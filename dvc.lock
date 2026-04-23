@@ -1,0 +1,49 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m src.ingestion.load_data
+    outs:
+    - path: data/raw/data.parquet
+      hash: md5
+      md5: 51b279b77d3d9edc356b1c6e2a07ec49
+      size: 22187778
+  processing:
+    cmd: python -m src.processing.cleaning
+    deps:
+    - path: data/raw/data.parquet
+      hash: md5
+      md5: 51b279b77d3d9edc356b1c6e2a07ec49
+      size: 22187778
+    outs:
+    - path: data/processed/clean.parquet
+      hash: md5
+      md5: c20409a2cc9bfe784a6a2ebbd7e728a7
+      size: 24397861
+  features:
+    cmd: python -m src.processing.feature_engineering
+    deps:
+    - path: data/processed/clean.parquet
+      hash: md5
+      md5: c20409a2cc9bfe784a6a2ebbd7e728a7
+      size: 24397861
+    outs:
+    - path: data/features/features.parquet
+      hash: md5
+      md5: 5e666cd74c50c5ae63dc0d01a0d84ee8
+      size: 24969086
+  train:
+    cmd: python -m src.modeling.train
+    deps:
+    - path: data/features/features.parquet
+      hash: md5
+      md5: 5e666cd74c50c5ae63dc0d01a0d84ee8
+      size: 24969086
+    - path: src/modeling/train.py
+      hash: md5
+      md5: 6512667fc094919d161ff3ab4264bb68
+      size: 5556
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 5c3e6f103d886f689ab957653c472517
+      size: 16353

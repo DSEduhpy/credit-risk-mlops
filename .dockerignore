@@ -1,0 +1,11 @@
+.git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+mlruns/
+data/
+models/
+.dvc/

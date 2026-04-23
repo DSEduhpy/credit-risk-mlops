@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambiente
+.env
+.venv/
+
+# Dados
+data/
+*.parquet
+*.csv
+
+# Modelos
+models/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# DVC cache
+.dvc/cache
+
+# Logs
+*.log
+
+# VSCode
+.vscode/

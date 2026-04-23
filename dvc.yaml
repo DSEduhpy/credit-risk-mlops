@@ -1,0 +1,27 @@
+stages:
+  ingest:
+    cmd: python -m src.ingestion.load_data
+    outs:
+      - data/raw/data.parquet
+
+  processing:
+    cmd: python -m src.processing.cleaning
+    deps:
+      - data/raw/data.parquet
+    outs:
+      - data/processed/clean.parquet
+
+  features:
+    cmd: python -m src.processing.feature_engineering
+    deps:
+      - data/processed/clean.parquet
+    outs:
+      - data/features/features.parquet
+
+  train:
+    cmd: python -m src.modeling.train
+    deps:
+      - data/features/features.parquet
+      - src/modeling/train.py
+    outs:
+      - models/model.pkl
