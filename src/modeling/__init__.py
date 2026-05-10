@@ -1,1 +1,3 @@
-"""Pacote de modelagem e treino."""
+"""
+Pacote de modelagem.
+"""
