@@ -17,6 +17,8 @@ def build_features() -> None:
     categorical_columns = df.select_dtypes(include=["object"]).columns.tolist()
     if categorical_columns:
         df = pd.get_dummies(df, columns=categorical_columns, dummy_na=True, drop_first=True)
+        # Clean column names for LightGBM compatibility
+        df.columns = df.columns.str.replace(r'[^\w]', '_', regex=True)
 
     df[TARGET_COLUMN] = target
     FEATURES_PATH.parent.mkdir(parents=True, exist_ok=True)

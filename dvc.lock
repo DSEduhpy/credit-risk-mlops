@@ -29,21 +29,22 @@ stages:
     outs:
     - path: data/features/features.parquet
       hash: md5
-      md5: 5e666cd74c50c5ae63dc0d01a0d84ee8
+      md5: 39ffd3abcc8bee1c62e38975c7189ea8
       size: 24969086
   train:
     cmd: python -m src.modeling.train
     deps:
     - path: data/features/features.parquet
       hash: md5
-      md5: 5e666cd74c50c5ae63dc0d01a0d84ee8
+      md5: 39ffd3abcc8bee1c62e38975c7189ea8
       size: 24969086
     - path: src/modeling/train.py
       hash: md5
-      md5: 7c2903f6740fd223c909ffa0bc1d47d0
-      size: 4608
+      md5: 56988363b296f9db0c4aebbc759bbb36
+      size: 8685
     outs:
-    - path: models/model.pkl
+    - path: models/
       hash: md5
-      md5: 8508d2993c5434d131a4a63399a43bb2
-      size: 16353
+      md5: 8406ba0d2d62de5dc9c90dc905ec343c.dir
+      size: 1978930
+      nfiles: 4

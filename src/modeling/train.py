@@ -120,7 +120,7 @@ def train_single_model(
     # ==========================================================
     # Otimização de threshold
     # ==========================================================
-    best_threshold = optimize_threshold(
+    best_threshold, _ = optimize_threshold(
         y_true=data.y_test,
         y_proba=y_proba,
         custo_inadimplente=10000,

@@ -87,7 +87,7 @@ def test_sampling(data):
     
     # Test with full sample
     sampled_full = sample_data(data, max_samples=len(data) + 1)
-    assert len(sampled_full) == len(data), "Should return full dataset when max_samples > n"
+    assert len(sampled_full) == len(data), "Should return full dataset when max_samples > n_rows"
     print(f"✓ Full dataset returned when max_samples > n_rows")
     
     # Test with reduced sample

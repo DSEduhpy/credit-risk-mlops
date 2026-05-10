@@ -48,7 +48,17 @@ models/
 application_train.csv
 
 # ==========================================================
+# Temporary files
+# ==========================================================
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
 # OS files
 # ==========================================================
 .DS_Store
 Thumbs.db
+/models
+
+# CatBoost
+catboost_info/

@@ -21,7 +21,7 @@
 
 ## ⏳ Próximos passos
 
-- [ ] Implementar explicabilidade com SHAP e análise local/global de features
+- [x] Implementar explicabilidade com SHAP e análise local/global de features
 - [ ] Desenvolver monitoramento de drift contínuo em produção
 - [ ] Adicionar testes automatizados de integração do pipeline e regressão de dados
 - [ ] Incluir validação de schema de dados com Great Expectations ou ferramenta equivalente

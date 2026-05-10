@@ -24,4 +24,4 @@ stages:
       - data/features/features.parquet
       - src/modeling/train.py
     outs:
-      - models/model.pkl
+      - models/

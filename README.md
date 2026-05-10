@@ -1,176 +1,198 @@
-# credit-risk-mlops
+# Credit Risk MLOps Pipeline
 
-## 1. Visão Geral
+## Overview
 
-Este projeto resolve o problema crítico de decisão de crédito automatizada para carteiras de consumidores. A solução suporta a avaliação de risco de inadimplência em escala, com foco em maximizar o retorno financeiro e minimizar perdas operacionais.
+This project addresses the critical problem of automated credit decision-making for consumer portfolios. The solution supports large-scale credit risk assessment, focusing on maximizing financial returns and minimizing operational losses.
 
-Em vez de otimizar métricas genéricas de classificação, o modelo é calibrado para o impacto de negócio real:
-- custo de inadimplência por cliente: `10000`
-- receita recuperável por cliente aprovado: `1000`
+Instead of optimizing generic classification metrics, the model is calibrated for real business impact:
+- Cost of default per client: `10000`
+- Recoverable revenue per approved client: `1000`
 
-O resultado estimado do projeto é um ganho financeiro incremental da ordem de `+23 milhões`, mantendo um equilíbrio técnico entre AUC, precision e recall.
+The estimated project result is an incremental financial gain of approximately `+23 million`, maintaining a technical balance between AUC, precision, and recall.
 
-## 2. Arquitetura do Sistema
+## Business Problem
 
-A arquitetura é composta por camadas claras:
-- `ingestion`: captura e consolida a base de origem em formato parquet
-- `processing`: limpeza, tratamento de missing e pré-processamento
-- `feature_engineering`: transformação categórica e geração de features modeláveis
-- `modeling`: treino com tracking de experimentos, produção de artefatos e otimização de threshold
-- `serving`: API FastAPI para inferência em tempo real
-- `monitoring`: detecção de drift e qualidade de dados
+Credit risk assessment involves balancing two key financial metrics:
+- **Default cost**: High cost when approving bad payers (false negatives)
+- **Revenue opportunity**: Lost profit when rejecting good payers (false positives)
 
-O pipeline é orquestrado pelo DVC, garantindo reprodutibilidade de dados, lógica e artefatos.
+The goal is to maximize net financial return by optimizing the decision threshold based on actual business costs, not statistical metrics.
 
-## 3. Stack Tecnológica
+## Architecture
 
-- Python 3.x
-- Pandas
-- Scikit-learn
-- MLflow (SQLite backend)
-- DVC
-- FastAPI
-- Docker
-- joblib
-- python-dotenv
+The system follows a modular architecture with clear separation of concerns:
 
-## 4. Pipeline de Dados
+- **ingestion**: Captures and consolidates source data into parquet format
+- **processing**: Data cleaning, missing value handling, and preprocessing
+- **feature_engineering**: Categorical transformation and feature generation
+- **modeling**: Training with experiment tracking, artifact production, and threshold optimization
+- **api**: FastAPI serving layer for real-time inference
+- **monitoring**: Drift detection and data quality monitoring
+- **explainability**: SHAP-based model explanations
 
-### ingest
-Responsável por ingerir o dataset bruto e gerar `data/raw/data.parquet`. A etapa valida a existência do arquivo CSV original e materializa o dataset em formato columnar.
+The pipeline is orchestrated by DVC, ensuring reproducibility of data, logic, and artifacts.
 
-### processing
-Executa limpeza estruturada:
-- remoção de duplicatas
-- drop de colunas com >90% de missing
-- imputação numérica por mediana
-- preenchimento de categóricos com `missing`
-- engenharia básica de transformação logarítmica
+```
+credit-risk-mlops/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── features/
+├── docs/
+├── models/
+├── reports/
+├── src/
+│   ├── ingestion/
+│   ├── processing/
+│   ├── modeling/
+│   ├── evaluation/
+│   ├── api/
+│   ├── monitoring/
+│   └── explainability/
+├── tests/
+├── .github/workflows/
+├── dvc.yaml
+├── Dockerfile
+├── requirements.txt
+├── README.md
+└── tasklist.md
+```
 
-O objetivo é estabilizar a qualidade dos dados antes da geração de features.
+## Tech Stack
 
-### features
-Transforma o dataset limpo em features para o modelo:
-- one-hot encoding de variáveis categóricas
-- preservação de label target
-- persistência em `data/features/features.parquet`
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Language | Python 3.x | Core development |
+| Data Processing | Pandas, PyArrow | Data manipulation and columnar storage |
+| Machine Learning | Scikit-learn, XGBoost, LightGBM, CatBoost | Modeling and algorithms |
+| Experiment Tracking | MLflow | Model versioning and metrics |
+| Data Versioning | DVC | Pipeline orchestration and data versioning |
+| API | FastAPI | Real-time inference serving |
+| Explainability | SHAP | Model interpretability |
+| Containerization | Docker | Environment portability |
+| Visualization | Matplotlib | Charts and plots |
 
-Essa etapa isola a lógica de feature engineering do processo de treino.
+## Pipeline
 
-### train
-Treina um classificador de risco e registra o experimento no MLflow.
-- dados de treino/teste estratificados
-- log de parâmetros de treino
-- log de métricas de performance
-- persistência do modelo em `models/model.pkl`
+### Data Pipeline
+- **ingest**: Validates CSV source and creates `data/raw/data.parquet`
+- **processing**: Cleans data, handles missing values, applies transformations
+- **features**: Generates model-ready features with one-hot encoding
 
-## 5. Modelagem
+### Training Pipeline
+- **train**: Trains multi-model benchmark with MLflow tracking
 
-O projeto foi estruturado para um modelo de classificação binária rodando dentro de um pipeline de pre-processamento.
+## Modeling
 
-### Problema de desbalanceamento
-A classe de inadimplência é minoritária. Por isso, o treinamento considera:
-- estratificação em `train_test_split`
-- uso de class_weight para mitigar viés de classe (via pipeline configurável)
-- métricas além de acurácia, como AUC, precision e recall
+The project implements a multi-model benchmark for binary classification:
 
-### Pipeline de modelo
-A arquitetura prevê um pipeline reutilizável, onde o pré-processamento e o classificador podem ser versionados separadamente. Essa modularidade facilita:
-- auditoria de features
-- swap de algoritmos (Logistic Regression, Random Forest, etc.)
-- testes de regressão
+- **Logistic Regression**: Baseline linear model
+- **XGBoost**: Gradient boosting with tree-based optimization
+- **LightGBM**: Microsoft gradient boosting framework
+- **CatBoost**: Yandex categorical feature handling
 
-## 6. Otimização orientada a negócio
+All models are trained with:
+- Stratified train/test splits to handle class imbalance
+- Class weighting to mitigate bias
+- Comprehensive metric logging (AUC, precision, recall, financial impact)
 
-### Por que F1-score não é suficiente
-F1-score agrupa precision e recall com peso igual. No scoring de crédito, o custo de um falso negativo (inadimplente aprovado) é muito maior que o custo de um falso positivo.
+## Business Optimization
 
-### Como foi feita a otimização
-A otimização é baseada em uma função de custo de negócio:
-- `custo_inadimplente = 10000`
-- `lucro_cliente = 1000`
+### Threshold Calibration
+Instead of using default 0.5 threshold, the system optimizes based on business costs:
+- Default cost: 10,000 per bad approval
+- Revenue: 1,000 per good approval
 
-O threshold de decisão é calibrado para maximizar lucros e minimizar perdas, em vez de maximizar F1. Isso implica ajustar trade-offs entre:
-- precision: evita admitir clientes de alto risco
-- recall: identifica inadimplentes para reduzir perdas
+The optimal threshold maximizes net profit by finding the right balance between precision (avoiding bad approvals) and recall (capturing defaults).
 
-### Trade-off
-A solução busca um ponto de operação em que o ganho marginal de precisão compense a perda de recall, mantendo o impacto financeiro positivo. Esse é o principal diferencial em relação a abordagens puramente estatísticas.
+## Results
 
-## 7. Resultados
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| AUC | ~0.748 | Good separation between good/bad payers |
+| Precision | ~0.17 | Accuracy of positive predictions in imbalanced context |
+| Recall | ~0.64 | Ability to capture actual defaulters |
+| Financial Impact | +23M | Estimated incremental profit |
 
-- AUC: ~0.748 — indica capacidade de separação entre bons e maus pagadores
-- Precision: ~0.17 — reflete a taxa de previsões positivas corretas em um contexto de classes desbalanceadas
-- Recall: ~0.64 — demonstra a capacidade de capturar inadimplentes
-- Resultado financeiro: `+23 milhões` — estimativa de ganho incremental considerando custo de inadimplência e receita por cliente
+## MLflow Tracking
 
-Esses resultados mostram que a solução equilibra performance técnica e retorno econômico, priorizando a governança de risco.
+Experiments are tracked with:
+- Model parameters and hyperparameters
+- Performance metrics (AUC, precision, recall)
+- Business metrics (profit, loss)
+- Model artifacts and versions
 
-## 8. Problemas encontrados
+Access tracking UI with: `mlflow ui --backend-store-uri ./mlruns`
 
-- `ModuleNotFoundError` ao executar módulos isolados: resolvido usando `python -m src.ingestion.load_data` e ajustando imports relativos abertos.
-- Erro no MLflow ao logar função em vez de valor: resolvido ao garantir `mlflow.log_metric(...)` com valores numéricos explícitos.
-- `ConvergenceWarning` no classificador: mitigado com normalização de features e estabilização do pipeline de pré-processamento.
-- Threshold mal calibrado: corrigido ao introduzir função de custo financeiro e validação de pontos de corte no conjunto de teste.
-- Pipeline quebrando no DVC: resolvido ajustando dependências e outputs no `dvc.yaml`, garantindo que cada stage tenha arquivos de entrada/saída consistentes.
-- DataFrame fragmentado / performance warning: minimizado usando parquet como formato persistente e evitando concatenações repetidas no pipeline.
+## API
 
-## 9. Produção e MLOps
-
-- DVC garante reprodutibilidade de dados, transformações e saídas em cada etapa.
-- MLflow garante rastreamento de experimentos, versionamento de runs e registro de artefatos de modelo.
-- FastAPI entrega uma camada de serving com inferência em tempo real.
-- Docker garante portabilidade e alinhamento entre ambientes de desenvolvimento, staging e produção.
-
-Esse stack permite mover a solução para um fluxo de deploy confiável, com controle de versão e auditabilidade.
-
-## 10. Como rodar
-
-### 1. Instalar dependências
+FastAPI-based inference service with endpoint:
 
 ```bash
+POST /predict
+Content-Type: application/json
+
+{
+  "features": {
+    "AMT_INCOME_TOTAL": 202500.0,
+    "DAYS_BIRTH": -12012,
+    "CODE_GENDER": "F"
+  }
+}
+```
+
+## Explainability
+
+SHAP-based explanations for model interpretability. See [docs/explainability.md](docs/explainability.md) for details.
+
+## Monitoring
+
+Drift detection monitors:
+- Feature distribution changes
+- Prediction distribution shifts
+- Data quality metrics
+
+## Run Locally
+
+### Prerequisites
+- Python 3.8+
+- Git
+
+### Setup
+```bash
+# Clone repository
+git clone <repository-url>
+cd credit-risk-mlops
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. Configurar ambiente
+# Configure environment
+cp .env.example .env
 
-```bash
-copy .env.example .env
-```
-
-### 3. Executar pipeline DVC
-
-```bash
+# Run DVC pipeline
 dvc repro
-```
 
-### 4. Iniciar MLflow UI
-
-```bash
+# Start MLflow UI
 mlflow ui --backend-store-uri ./mlruns
-```
 
-### 5. Executar API
-
-```bash
+# Start API server
 uvicorn src.api.app:app --host 0.0.0.0 --port 8000
-```
 
-### 6. Chamar inferência
-
-```bash
+# Test inference
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
   -d '{"features": {"AMT_INCOME_TOTAL": 202500.0, "DAYS_BIRTH": -12012, "CODE_GENDER": "F"}}'
 ```
 
-## 11. Roadmap
+## Roadmap
 
-- SHAP para explicabilidade local e global
-- Monitoramento de drift real com alertas operacionais
-- CI/CD com GitHub Actions para pipeline, testes e deploy
-- Deploy em cloud (AWS / GCP) com containers imutáveis
-- Feature Store conceitual para governança de atributos
-- Validação de dados avançada com Great Expectations
-- Testes automatizados de integração e regressão de modelo
-- Plano de observabilidade para métricas de qualidade e performance
+- [x] Multi-model benchmark (Logistic, XGBoost, LightGBM, CatBoost)
+- [x] SHAP explainability implementation
+- [x] Business-oriented threshold optimization
+- [ ] GitHub Actions CI/CD pipeline
+- [ ] Cloud deployment (AWS/GCP) with containers
+- [ ] Advanced monitoring and alerting
+- [ ] Automated testing suite
+- [ ] Feature store implementation
+- [ ] Model A/B testing framework
