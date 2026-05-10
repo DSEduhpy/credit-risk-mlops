@@ -1,185 +1,222 @@
 """
-Módulo de treinamento de modelo de risco de crédito.
+Pipeline de treinamento e benchmark multi-modelo para risco de crédito.
+
+Responsabilidades:
+- Carregar dados
+- Separar treino/teste
+- Benchmark entre múltiplos modelos
+- Otimizar threshold para cada modelo
+- Calcular métricas técnicas e financeiras
+- Registrar experimentos no MLflow
+- Persistir modelos treinados
 """
+
+import time
+from pathlib import Path
+from typing import Dict, List
 
 import joblib
 import mlflow
 import pandas as pd
-import numpy as np
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    roc_auc_score,
-    precision_score,
-    recall_score,
-    precision_recall_curve,
-)
-from sklearn.model_selection import train_test_split
 
 from src.config import (
-    FEATURES_PATH,
     MLFLOW_TRACKING_URI,
-    MODEL_PATH,
-    RANDOM_STATE,
-    TARGET_COLUMN,
-    TEST_SIZE,
+    PROJECT_ROOT,
 )
 from src.logger import get_logger
 
+from src.modeling.data import (
+    load_features,
+    split_data,
+)
+
+from src.modeling.models import (
+    build_catboost_model,
+    build_lightgbm_model,
+    build_logistic_model,
+    build_xgboost_model,
+)
+
+from src.evaluation.metrics import (
+    compute_metrics,
+)
+
+from src.evaluation.threshold import (
+    optimize_threshold,
+)
+
+from src.evaluation.business_metrics import (
+    simulate_business_metrics,
+)
+
 logger = get_logger(__name__)
 
+# Dicionário de modelos para benchmark
+MODELS = {
+    "logistic": build_logistic_model,
+    "xgboost": build_xgboost_model,
+    "lightgbm": build_lightgbm_model,
+    "catboost": build_catboost_model,
+}
 
-def load_features() -> pd.DataFrame:
-    if not FEATURES_PATH.exists():
-        raise FileNotFoundError(f"Arquivo não encontrado: {FEATURES_PATH}")
-    return pd.read_parquet(FEATURES_PATH)
+
+def create_pipeline(model) -> Pipeline:
+    """Cria pipeline com scaler e modelo."""
+    return Pipeline([
+        ("scaler", StandardScaler()),
+        ("model", model)
+    ])
 
 
-def compute_metrics(y_true, y_pred, y_proba) -> dict:
+def train_single_model(
+    model_name: str,
+    model_func,
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+) -> Dict:
+    """Treina um único modelo e retorna métricas."""
+    logger.info(f"Iniciando treinamento do modelo: {model_name}")
+
+    start_time = time.perf_counter()
+
+    # Construir pipeline
+    model = create_pipeline(model_func())
+
+    # Treinar
+    model.fit(X_train, y_train)
+
+    # Gerar probabilidades
+    y_proba = model.predict_proba(X_test)[:, 1]
+
+    # Otimizar threshold
+    best_threshold, best_resultado = optimize_threshold(
+        y_true=y_test,
+        y_proba=y_proba,
+        custo_inadimplente=10000,
+        lucro_cliente=1000,
+    )
+
+    y_pred = (y_proba >= best_threshold).astype(int)
+
+    # Métricas técnicas
+    metrics_dict = compute_metrics(
+        y_true=y_test,
+        y_pred=y_pred,
+        y_proba=y_proba,
+    )
+
+    # Métricas de negócio
+    business_metrics = simulate_business_metrics(
+        y_true=y_test,
+        y_pred=y_pred,
+        custo_inadimplente=10000,
+        lucro_cliente=1000,
+    )
+
+    training_time = time.perf_counter() - start_time
+
+    logger.info(
+        f"Modelo {model_name} finalizado",
+        extra={
+            "model": model_name,
+            "training_time": training_time,
+            "best_threshold": best_threshold,
+            "resultado": business_metrics["resultado"],
+        }
+    )
+
     return {
-        "auc": roc_auc_score(y_true, y_proba),
-        "precision": precision_score(y_true, y_pred, zero_division=0),
-        "recall": recall_score(y_true, y_pred, zero_division=0),
+        "model_name": model_name,
+        "model": model,
+        "metrics": metrics_dict,
+        "business_metrics": business_metrics,
+        "best_threshold": best_threshold,
+        "training_time": training_time,
     }
 
 
+def log_to_mlflow(model_name: str, result: Dict) -> None:
+    """Registra experimento no MLflow."""
+    with mlflow.start_run(run_name=model_name):
+        # Parâmetros
+        mlflow.log_param("model", model_name)
+        mlflow.log_param("threshold", float(result["best_threshold"]))
+        mlflow.log_param("training_time", float(result["training_time"]))
+
+        # Métricas técnicas
+        for key, value in result["metrics"].items():
+            mlflow.log_metric(key, float(value))
+
+        # Métricas negócio
+        for key, value in result["business_metrics"].items():
+            mlflow.log_metric(key, float(value))
+
+        # Salvar modelo
+        model_path = PROJECT_ROOT.parent / "models" / f"{model_name}.pkl"
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(result["model"], model_path)
+
+        mlflow.log_artifact(str(model_path), artifact_path="model")
+
+
+def print_leaderboard(results: List[Dict]) -> None:
+    """Imprime leaderboard final no terminal."""
+    print("\n===== BENCHMARK FINAL =====")
+    print(f"{'Modelo':<12} | {'AUC':<6} | {'Precision':<10} | {'Recall':<8} | {'Resultado':<10}")
+    print("-" * 60)
+
+    for result in results:
+        auc = result["metrics"].get("auc", 0)
+        precision = result["metrics"].get("precision", 0)
+        recall = result["metrics"].get("recall", 0)
+        resultado = result["business_metrics"].get("resultado", 0)
+
+        print(f"{result['model_name']:<12} | {auc:<6.4f} | {precision:<10.4f} | {recall:<8.4f} | {resultado:<10.0f}")
+
+    print("=" * 60)
+
+
 def train() -> None:
-    logger.info("Iniciando treinamento do modelo")
+    """
+    Executa benchmark multi-modelo.
+    """
+    logger.info("Iniciando benchmark multi-modelo")
 
+    # Configurar MLflow
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-    mlflow.set_experiment("credit_risk")
+    mlflow.set_experiment("credit_risk_benchmark")
 
-    # =============================
-    # Dados
-    # =============================
+    # Carregar dados
     data = load_features()
+    X_train, X_test, y_train, y_test = split_data(data)
 
-    if TARGET_COLUMN not in data.columns:
-        raise ValueError(f"Coluna alvo '{TARGET_COLUMN}' não encontrada")
+    results = []
 
-    X = data.drop(columns=[TARGET_COLUMN])
-    y = data[TARGET_COLUMN].astype(int)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=TEST_SIZE,
-        random_state=RANDOM_STATE,
-        stratify=y,
-    )
-
-    # =============================
-    # Modelo
-    # =============================
-    model = Pipeline([
-        ("scaler", StandardScaler()),
-        ("model", LogisticRegression(
-            max_iter=3000,
-            class_weight="balanced"
-        ))
-    ])
-
-    model.fit(X_train, y_train)
-
-    # =============================
-    # Predições
-    # =============================
-    y_proba = model.predict_proba(X_test)[:, 1]
-
-    # =============================
-    # Otimização de threshold (NEGÓCIO)
-    # =============================
-    custo_inadimplente = 10000
-    lucro_cliente = 1000
-
-    _, _, thresholds = precision_recall_curve(y_test, y_proba)
-
-    best_resultado = -np.inf
-    best_threshold = 0.5
-
-    for t in thresholds:
-        y_pred_temp = (y_proba >= t).astype(int)
-
-        fn = ((y_pred_temp == 0) & (y_test == 1)).sum()
-        tn = ((y_pred_temp == 0) & (y_test == 0)).sum()
-
-        prejuizo_temp = fn * custo_inadimplente
-        lucro_temp = tn * lucro_cliente
-        resultado_temp = lucro_temp - prejuizo_temp
-
-        if resultado_temp > best_resultado:
-            best_resultado = resultado_temp
-            best_threshold = t
-
-    # Predição final
-    y_pred = (y_proba >= best_threshold).astype(int)
-
-    # =============================
-    # Métricas
-    # =============================
-    metrics_dict = compute_metrics(y_test.values, y_pred, y_proba)
-
-    # =============================
-    # IMPACTO FINANCEIRO CORRETO
-    # =============================
-    tp = ((y_pred == 1) & (y_test == 1)).sum()
-    fp = ((y_pred == 1) & (y_test == 0)).sum()
-    fn = ((y_pred == 0) & (y_test == 1)).sum()
-    tn = ((y_pred == 0) & (y_test == 0)).sum()
-
-    prejuizo = fn * custo_inadimplente
-    lucro = tn * lucro_cliente
-    resultado = lucro - prejuizo
-
-    # =============================
-    # Logs no terminal
-    # =============================
-    print("\n===== MODELO OTIMIZADO =====")
-    print(f"Threshold: {best_threshold:.4f}")
-    print(f"AUC: {metrics_dict['auc']:.4f}")
-    print(f"Precision: {metrics_dict['precision']:.4f}")
-    print(f"Recall: {metrics_dict['recall']:.4f}")
-    print("================================\n")
-
-    print("\n===== IMPACTO FINANCEIRO =====")
-    print(f"Lucro estimado: {lucro}")
-    print(f"Prejuízo estimado: {prejuizo}")
-    print(f"Resultado líquido: {resultado}")
-    print("================================\n")
-
-    # =============================
-    # MLflow
-    # =============================
-    with mlflow.start_run() as run:
-
-        mlflow.log_param("model", "logistic_regression")
-        mlflow.log_param("max_iter", 3000)
-        mlflow.log_param("class_weight", "balanced")
-        mlflow.log_param("threshold", float(best_threshold))
-
-        mlflow.log_metric("auc", float(metrics_dict["auc"]))
-        mlflow.log_metric("precision", float(metrics_dict["precision"]))
-        mlflow.log_metric("recall", float(metrics_dict["recall"]))
-        mlflow.log_metric("positive_rate", float(y_pred.mean()))
-        mlflow.log_metric("lucro", float(lucro))
-        mlflow.log_metric("prejuizo", float(prejuizo))
-        mlflow.log_metric("resultado", float(resultado))
-
-        MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-        joblib.dump(model, MODEL_PATH)
-
-        mlflow.log_artifact(str(MODEL_PATH), artifact_path="model")
-
-        logger.info(
-            "Treinamento concluído",
-            extra={
-                "run_id": run.info.run_id,
-                "metrics": metrics_dict,
-                "resultado": resultado,
-            },
+    # Loop de benchmark
+    for model_name, model_func in MODELS.items():
+        result = train_single_model(
+            model_name=model_name,
+            model_func=model_func,
+            X_train=X_train,
+            y_train=y_train,
+            X_test=X_test,
+            y_test=y_test,
         )
+
+        # Logar no MLflow
+        log_to_mlflow(model_name, result)
+
+        results.append(result)
+
+    # Leaderboard final
+    print_leaderboard(results)
+
+    logger.info("Benchmark concluído", extra={"num_models": len(results)})
 
 
 if __name__ == "__main__":
