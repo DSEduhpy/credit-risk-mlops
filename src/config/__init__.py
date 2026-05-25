@@ -87,6 +87,7 @@ REPORTS_PATH: str = str(settings.paths.reports)
 
 # Legacy aliases expected by older modules/tests
 RAW_DATA_PATH: str = DATA_RAW_PATH
+RAW_CSV_PATH: str = DATA_RAW_PATH
 CLEAN_DATA_PATH: str = DATA_PROCESSED_PATH
 FEATURE_DATA_PATH: str = DATA_FEATURES_PATH
 FEATURES_PATH: str = DATA_FEATURES_PATH
@@ -124,6 +125,7 @@ __all__ = [
     "REPORTS_PATH",
     "TARGET_COLUMN",
     "RAW_DATA_PATH",
+    "RAW_CSV_PATH",
     "CLEAN_DATA_PATH",
     "FEATURE_DATA_PATH",
     "MODEL_PATH",
