@@ -178,6 +178,20 @@ def calculate_quality_score(df: pd.DataFrame) -> Dict[str, float]:
     return results
 
 
+def check_data_quality(
+    df: pd.DataFrame,
+    critical_columns: Optional[List[str]] = None,
+) -> Dict[str, Dict]:
+    """
+    Backward-compatible wrapper for automated tests.
+    """
+
+    return validate_data_quality(
+        df=df,
+        critical_columns=critical_columns,
+    )
+
+
 def validate_data_quality(
     df: pd.DataFrame,
     critical_columns: Optional[List[str]] = None,
