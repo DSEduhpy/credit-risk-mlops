@@ -1,23 +1,42 @@
-from typing import Dict, Optional, Sequence
+from typing import Dict, Sequence
 
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+import numpy as np
+
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 
 
 def compute_metrics(
     y_true: Sequence[int],
-    y_pred: Sequence[int],
-    y_proba: Optional[Sequence[float]] = None,
+    y_prob: Sequence[float],
+    threshold: float = 0.5,
 ) -> Dict[str, float]:
-    """Computa métricas de avaliação de classificação binária."""
-    metrics = {
-        "precision": precision_score(y_true, y_pred, zero_division=0),
-        "recall": recall_score(y_true, y_pred, zero_division=0),
-        "f1_score": f1_score(y_true, y_pred, zero_division=0),
-        "accuracy": (sum(1 for yt, yp in zip(y_true, y_pred) if yt == yp) / len(y_true)),
+    """
+    Calcula métricas de classificação a partir das probabilidades.
+    """
+
+    if not 0 <= threshold <= 1:
+        raise ValueError("threshold deve estar entre 0 e 1")
+
+    y_pred = (np.array(y_prob) >= threshold).astype(int)
+
+    return {
+        "auc": float(roc_auc_score(y_true, y_prob)),
+        "recall": float(
+            recall_score(y_true, y_pred, zero_division=0)
+        ),
+        "precision": float(
+            precision_score(y_true, y_pred, zero_division=0)
+        ),
+        "f1": float(
+            f1_score(y_true, y_pred, zero_division=0)
+        ),
+        "accuracy": float(
+            accuracy_score(y_true, y_pred)
+        ),
     }
-
-    if y_proba is not None:
-        metrics["auc"] = roc_auc_score(y_true, y_proba)
-
-    return metrics
-

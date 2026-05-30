@@ -23,7 +23,12 @@ def load_features() -> pd.DataFrame:
     return pd.read_parquet(FEATURES_PATH)
 
 
-def split_data(data: pd.DataFrame):
+def split_data(
+    data: pd.DataFrame,
+    test_size: float = TEST_SIZE,
+    random_state: int = RANDOM_STATE,
+    stratify: bool = True,
+):
     """
     Realiza split treino/teste.
     """
@@ -36,10 +41,12 @@ def split_data(data: pd.DataFrame):
     X = data.drop(columns=[TARGET_COLUMN])
     y = data[TARGET_COLUMN].astype(int)
 
+    stratify_target = y if stratify else None
+
     return train_test_split(
         X,
         y,
-        test_size=TEST_SIZE,
-        random_state=RANDOM_STATE,
-        stratify=y,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=stratify_target,
     )

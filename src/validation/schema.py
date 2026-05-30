@@ -126,7 +126,11 @@ EXPECTED_SCHEMA = {
     "AMT_REQ_CREDIT_BUREAU_YEAR": {"dtype": "float64", "nullable": True, "min": 0},
 }
 
-REQUIRED_COLUMNS = ["TARGET", "AMT_INCOME_TOTAL", "DAYS_BIRTH", "AMT_CREDIT"]
+REQUIRED_COLUMNS = [
+    "loan_amnt",
+    "annual_inc",
+    "default",
+]
 
 
 def validate_required_columns(df: pd.DataFrame) -> Tuple[bool, List[str]]:
@@ -149,36 +153,28 @@ def validate_required_columns(df: pd.DataFrame) -> Tuple[bool, List[str]]:
     return is_valid, missing
 
 
-def validate_column_types(df: pd.DataFrame) -> Dict[str, Dict]:
-    """
-    Valida tipos de dados das colunas.
+def validate_column_types(df):
+    EXPECTED_DTYPES = {
+    "loan_amnt": "float64",
+    "annual_inc": "float64",
+    "default": "int64",
+    }
 
-    Args:
-        df: DataFrame a validar
+    for col, expected_dtype in EXPECTED_DTYPES.items():
 
-    Returns:
-        Dicionário com resultados da validação
-    """
-    results = {}
-
-    for col, expected in EXPECTED_SCHEMA.items():
         if col not in df.columns:
             continue
 
         actual_dtype = str(df[col].dtype)
-        expected_dtype = expected["dtype"]
 
-        is_valid = actual_dtype == expected_dtype
-        results[col] = {
-            "expected_dtype": expected_dtype,
-            "actual_dtype": actual_dtype,
-            "is_valid": is_valid,
-        }
+        if actual_dtype != expected_dtype:
+            raise TypeError(
+                f"Coluna '{col}' deveria ser "
+                f"{expected_dtype} mas recebeu "
+                f"{actual_dtype}"
+            )
 
-        if not is_valid:
-            logger.warning(f"Tipo incorreto para {col}: esperado {expected_dtype}, encontrado {actual_dtype}")
-
-    return results
+    return True
 
 
 def validate_ranges(df: pd.DataFrame) -> Dict[str, Dict]:
@@ -295,30 +291,29 @@ def validate_cardinality(df: pd.DataFrame) -> Dict[str, Dict]:
     return results
 
 
-def validate_schema(df: pd.DataFrame) -> Dict[str, Dict]:
-    """
-    Executa validação completa de schema.
+def validate_schema(df):
 
-    Args:
-        df: DataFrame a validar
+    if df.empty:
+        raise ValueError("DataFrame vazio")
 
-    Returns:
-        Dicionário consolidado com resultados
-    """
-    logger.info("Iniciando validação de schema")
-
-    # Validações críticas que bloqueiam execução
     validate_required_columns(df)
+    validate_column_types(df)
 
     results = {
-        "required_columns": {"is_valid": True, "missing": []},
-        "column_types": validate_column_types(df),
+        "required_columns": {
+            "is_valid": True,
+            "missing": [],
+        },
+        "column_types": {
+            "is_valid": True,
+        },
         "ranges": validate_ranges(df),
         "categories": validate_categories(df),
         "cardinality": validate_cardinality(df),
     }
 
     logger.info("Validação de schema concluída")
+
     return results
 
 

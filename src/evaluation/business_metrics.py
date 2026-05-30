@@ -47,40 +47,60 @@ def simulate_business_metrics(
     }
 
 
+import numpy as np
+
+
 def compute_business_profit(
     y_true,
-    y_pred,
-    custo_inadimplente=10000,
-    lucro_cliente=1000,
+    y_prob,
+    threshold=0.5,
+    default_cost=10000,
+    revenue_per_approval=1000,
 ):
     """
-    Backward-compatible wrapper used by automated tests.
+    Calcula lucro líquido do modelo.
     """
 
-    return simulate_business_metrics(
-        y_true=y_true,
-        y_pred=y_pred,
-        custo_inadimplente=custo_inadimplente,
-        lucro_cliente=lucro_cliente,
+    if len(y_true) == 0:
+        raise ValueError("Input vazio")
+
+    if not 0 <= threshold <= 1:
+        raise ValueError("Threshold deve estar entre 0 e 1")
+
+    y_true = np.asarray(y_true)
+    y_prob = np.asarray(y_prob)
+
+    approved = y_prob < threshold
+
+    good_customers = approved & (y_true == 0)
+    bad_customers = approved & (y_true == 1)
+
+    profit = (
+        good_customers.sum() * revenue_per_approval
+        - bad_customers.sum() * default_cost
     )
+
+    return float(profit)
 
 
 def compute_profit_by_threshold(
     y_true,
-    y_pred,
-    custo_inadimplente=10000,
-    lucro_cliente=1000,
+    y_prob,
+    thresholds=None,
 ):
-    """
-    Compatibility wrapper for threshold-based business evaluation.
-    """
+    if thresholds is None:
+        thresholds = np.arange(0.0, 1.01, 0.05)
 
-    return simulate_business_metrics(
-        y_true=y_true,
-        y_pred=y_pred,
-        custo_inadimplente=custo_inadimplente,
-        lucro_cliente=lucro_cliente,
-    )
+    results = {}
+
+    for threshold in thresholds:
+        results[float(threshold)] = compute_business_profit(
+            y_true,
+            y_prob,
+            threshold=threshold,
+        )
+
+    return results
 
 
 
@@ -89,40 +109,23 @@ def find_optimal_threshold(
     y_true,
     y_prob,
     thresholds=None,
-    custo_inadimplente=10000,
-    lucro_cliente=1000,
 ):
-    """
-    Finds threshold with best financial outcome.
-    Backward-compatible implementation for automated tests.
-    """
-
     if thresholds is None:
-        thresholds = np.arange(0.1, 1.0, 0.05)
+        thresholds = np.arange(0.0, 1.01, 0.05)
 
     best_threshold = 0.5
-    best_result = float("-inf")
-    best_metrics = None
+    best_profit = float("-inf")
 
     for threshold in thresholds:
-        y_pred = (y_prob >= threshold).astype(int)
 
-        metrics = simulate_business_metrics(
-            y_true=y_true,
-            y_pred=y_pred,
-            custo_inadimplente=custo_inadimplente,
-            lucro_cliente=lucro_cliente,
+        profit = compute_business_profit(
+            y_true,
+            y_prob,
+            threshold=threshold,
         )
 
-        resultado = metrics["resultado"]
-
-        if resultado > best_result:
-            best_result = resultado
+        if profit > best_profit:
+            best_profit = profit
             best_threshold = threshold
-            best_metrics = metrics
 
-    return {
-        "best_threshold": float(best_threshold),
-        "best_result": float(best_result),
-        "metrics": best_metrics,
-    }
+    return float(best_threshold)
