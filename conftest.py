@@ -18,18 +18,19 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import numpy as np
-import pandas as pd
-import pytest
-
-from src.config import TARGET_COLUMN
-
 # ---------------------------------------------------------------------------
 # CRITICAL: set the environment BEFORE any src import so config resolves
 # to TestConfig throughout the entire test session.
 # ---------------------------------------------------------------------------
 os.environ["CREDIT_RISK_ENV"] = "test"
 
+import numpy as np
+import pandas as pd
+import pytest
+
+from src.config import TARGET_COLUMN
+
+print("ENV AGORA =", os.getenv("CREDIT_RISK_ENV"))
 
 # ---------------------------------------------------------------------------
 # Ensure the project root is importable regardless of how pytest is invoked.

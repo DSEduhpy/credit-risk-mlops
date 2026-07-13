@@ -26,12 +26,6 @@ def split_data(
     """
 
     if TARGET_COLUMN not in data.columns:
-        print("\n" + "=" * 80)
-        print("TARGET_COLUMN:", TARGET_COLUMN)
-        print("COLUNAS:")
-        print(sorted(data.columns.tolist()))
-        print("=" * 80)
-
         raise ValueError(f"Coluna alvo '{TARGET_COLUMN}' não encontrada")
 
     X = data.drop(columns=[TARGET_COLUMN])
