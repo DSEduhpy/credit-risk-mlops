@@ -1,4 +1,5 @@
 import pandas as pd
+
 from src.config import CLEAN_DATA_PATH, FEATURES_PATH, TARGET_COLUMN
 from src.logger import get_logger
 
@@ -24,7 +25,9 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     # ---- [Feature] Encoding de Home Ownership ----
     if "home_ownership" in df.columns:
         mapping = {"MORTGAGE": 3, "OWN": 2, "RENT": 1}
-        df["home_ownership_encoded"] = df["home_ownership"].map(mapping).fillna(0).astype(int)
+        df["home_ownership_encoded"] = (
+            df["home_ownership"].map(mapping).fillna(0).astype(int)
+        )
 
     # ---- [Nova Feature] Encoding de Purpose ----
     if "purpose" in df.columns:
@@ -41,9 +44,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     # Processamento de variáveis categóricas
     categorical_columns = df.select_dtypes(include=["object"]).columns.tolist()
     if categorical_columns:
-        df = pd.get_dummies(df, columns=categorical_columns, dummy_na=True, drop_first=True)
+        df = pd.get_dummies(
+            df, columns=categorical_columns, dummy_na=True, drop_first=True
+        )
         # Garante compatibilidade de nomes de colunas com o LightGBM
-        df.columns = df.columns.str.replace(r'[^\w]', '_', regex=True)
+        df.columns = df.columns.str.replace(r"[^\w]", "_", regex=True)
 
     # Devolve o target ao DataFrame se ele existia originalmente
     if target is not None:
@@ -62,10 +67,10 @@ def build_features() -> None:
 
     # I/O: Leitura
     df = pd.read_parquet(CLEAN_DATA_PATH)
-    
+
     # Processamento através da função pura
     df_transformed = engineer_features(df)
-    
+
     # I/O: Escrita
     FEATURES_PATH.parent.mkdir(parents=True, exist_ok=True)
     df_transformed.to_parquet(FEATURES_PATH, index=False)

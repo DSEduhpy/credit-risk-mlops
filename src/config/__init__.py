@@ -26,20 +26,12 @@ any changes to callers::
 from __future__ import annotations
 
 import os
-from typing import Union
+from pathlib import Path
 
-from src.config.base import (
-    APIConfig,
-    BaseConfig,
-    BusinessConfig,
-    LoggingConfig,
-    MLflowConfig,
-    ModelConfig,
-    MonitoringConfig,
-    PathConfig,
-    ValidationConfig,
-    PROJECT_ROOT,
-)
+from src.config.base import (PROJECT_ROOT, APIConfig, BaseConfig,
+                             BusinessConfig, LoggingConfig, MLflowConfig,
+                             ModelConfig, MonitoringConfig, PathConfig,
+                             ValidationConfig)
 
 # ---------------------------------------------------------------------------
 # Environment resolution
@@ -51,13 +43,16 @@ def _resolve_settings(env: str) -> BaseConfig:
     """Instantiate the correct config class for the given environment tag."""
     if env == "prod":
         from src.config.prod import ProdConfig
+
         return ProdConfig()
     if env == "test":
         from src.config.test import TestConfig
+
         return TestConfig()
     # Default: dev (also covers any unrecognised value to avoid silent failures
     # in unknown environments — dev is the safest fallback)
     from src.config.dev import DevConfig
+
     return DevConfig()
 
 
@@ -79,19 +74,28 @@ BENCHMARK_MODELS: list = settings.models.benchmark_models
 MLFLOW_TRACKING_URI: str = settings.mlflow.tracking_uri
 MLFLOW_EXPERIMENT_NAME: str = settings.mlflow.experiment_name
 
-DATA_RAW_PATH: str = str(settings.paths.data_raw)
-DATA_PROCESSED_PATH: str = str(settings.paths.data_processed)
-DATA_FEATURES_PATH: str = str(settings.paths.data_features)
-MODELS_PATH: str = str(settings.paths.models)
-REPORTS_PATH: str = str(settings.paths.reports)
+DATA_RAW_PATH: Path = settings.paths.data_raw
+DATA_PROCESSED_PATH: Path = settings.paths.data_processed
+DATA_FEATURES_PATH: Path = settings.paths.data_features
+MODELS_PATH: Path = settings.paths.models
+REPORTS_PATH: Path = settings.paths.reports
 
 # Legacy aliases expected by older modules/tests
-RAW_DATA_PATH: str = DATA_RAW_PATH
-RAW_CSV_PATH: str = DATA_RAW_PATH
-CLEAN_DATA_PATH: str = DATA_PROCESSED_PATH
-FEATURE_DATA_PATH: str = DATA_FEATURES_PATH
-FEATURES_PATH: str = DATA_FEATURES_PATH
-MODEL_PATH: str = MODELS_PATH
+RAW_DATA_PATH = DATA_RAW_PATH
+RAW_CSV_PATH = DATA_RAW_PATH
+CLEAN_DATA_PATH = DATA_PROCESSED_PATH
+FEATURE_DATA_PATH = DATA_FEATURES_PATH
+FEATURES_PATH = DATA_FEATURES_PATH
+
+# ---------------------------------------------------------------------------
+# Modelo padrão utilizado por módulos que precisam carregar um único modelo
+# (Explainability, API, testes, etc.)
+# ---------------------------------------------------------------------------
+DEFAULT_MODEL_NAME = "logistic"
+
+MODEL_PATH: Path = (
+    settings.paths.models / settings.models.artifact_names[DEFAULT_MODEL_NAME]
+)
 
 TARGET_COLUMN: str = settings.validation.target_column
 

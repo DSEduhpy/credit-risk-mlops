@@ -15,13 +15,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.validation.schema import validate_schema
+from src.config import TARGET_COLUMN
 from src.validation.quality import check_data_quality
-
+from src.validation.schema import validate_schema
 
 # ---------------------------------------------------------------------------
 # Tests: Schema validation
 # ---------------------------------------------------------------------------
+
 
 class TestValidateSchema:
     """Tests for column-level schema enforcement."""
@@ -65,6 +66,7 @@ class TestValidateSchema:
 # Tests: Data quality checks
 # ---------------------------------------------------------------------------
 
+
 class TestCheckDataQuality:
     """Tests for data quality assertions."""
 
@@ -85,20 +87,22 @@ class TestCheckDataQuality:
     def test_too_few_rows_fails(self):
         """A DataFrame with fewer rows than the minimum must fail quality checks."""
         # Minimum is set to 10 in TestConfig
-        tiny_df = pd.DataFrame({"loan_amnt": [1000.0], "default": [0]})
+        tiny_df = pd.DataFrame({"loan_amnt": [1000.0], TARGET_COLUMN: [0]})
         with pytest.raises(Exception):
             check_data_quality(tiny_df)
 
-    def test_quality_report_contains_column_stats(self, feature_dataframe: pd.DataFrame):
+    def test_quality_report_contains_column_stats(
+        self, feature_dataframe: pd.DataFrame
+    ):
         """
         If check_data_quality returns a report dict, it must include
         per-column missing rates and a row count field.
         """
         result = check_data_quality(feature_dataframe)
         if isinstance(result, dict):
-            assert "row_count" in result or "n_rows" in result, (
-                "Quality report must include row count"
-            )
+            assert (
+                "row_count" in result or "n_rows" in result
+            ), "Quality report must include row count"
 
     def test_all_nulls_in_column_fails(self, feature_dataframe: pd.DataFrame):
         """A completely null column must be caught by quality checks."""

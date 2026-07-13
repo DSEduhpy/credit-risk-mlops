@@ -47,9 +47,6 @@ def simulate_business_metrics(
     }
 
 
-import numpy as np
-
-
 def compute_business_profit(
     y_true,
     y_prob,
@@ -76,8 +73,7 @@ def compute_business_profit(
     bad_customers = approved & (y_true == 1)
 
     profit = (
-        good_customers.sum() * revenue_per_approval
-        - bad_customers.sum() * default_cost
+        good_customers.sum() * revenue_per_approval - bad_customers.sum() * default_cost
     )
 
     return float(profit)
@@ -101,8 +97,6 @@ def compute_profit_by_threshold(
         )
 
     return results
-
-
 
 
 def find_optimal_threshold(

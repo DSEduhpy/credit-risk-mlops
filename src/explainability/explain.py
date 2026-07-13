@@ -16,14 +16,16 @@ Functions:
     main: Orquestra a execução completa do pipeline.
 """
 
-import joblib
-import shap
-import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional
 
-from src.config import FEATURES_PATH, MODEL_PATH, TARGET_COLUMN, RANDOM_STATE
+import joblib
+import matplotlib.pyplot as plt
+import pandas as pd
+import shap
+
+from src.config import (FEATURES_PATH, MODEL_PATH, RANDOM_STATE, REPORTS_PATH,
+                        TARGET_COLUMN)
 from src.logger import get_logger
 
 logger = get_logger(__name__)
@@ -42,7 +44,7 @@ FIGURE_DPI = 300
 FIGURE_FORMAT = "png"
 """Formato dos gráficos salvos."""
 
-REPORTS_DIR = Path(__file__).resolve().parent.parent.parent / "reports"
+REPORTS_DIR = REPORTS_PATH
 """Diretório base para salvar relatórios."""
 
 FIGURES_DIR = REPORTS_DIR / "figures"
@@ -123,9 +125,7 @@ def load_data(features_path: Optional[Path] = None) -> pd.DataFrame:
 
 
 def sample_data(
-    data: pd.DataFrame,
-    max_samples: int = MAX_SAMPLES,
-    random_state: int = RANDOM_STATE
+    data: pd.DataFrame, max_samples: int = MAX_SAMPLES, random_state: int = RANDOM_STATE
 ) -> pd.DataFrame:
     """
     Realiza amostragem dos dados para melhorar performance da análise SHAP.
@@ -170,8 +170,7 @@ def sample_data(
             proportion = len(group_data) / len(data)
             group_sample_size = max(1, int(max_samples * proportion))
             group_samples = group_data.sample(
-                n=min(group_sample_size, len(group_data)),
-                random_state=random_state
+                n=min(group_sample_size, len(group_data)), random_state=random_state
             )
             stratified_samples.append(group_samples)
         sampled = pd.concat(stratified_samples).sample(
@@ -179,10 +178,7 @@ def sample_data(
         )
     else:
         # Sem estratificação se coluna alvo não existir
-        sampled = data.sample(
-            n=max_samples,
-            random_state=random_state
-        )
+        sampled = data.sample(n=max_samples, random_state=random_state)
 
     logger.info(f"Amostra criada com {len(sampled)} linhas")
 
@@ -230,8 +226,7 @@ def create_explainer(model, X: pd.DataFrame) -> object:
             "TreeExplainer não disponível, usando KernelExplainer (mais lento)"
         )
         explainer = shap.KernelExplainer(
-            model_estimator.predict,
-            shap.sample(X, min(100, len(X)))
+            model_estimator.predict, shap.sample(X, min(100, len(X)))
         )
 
     return explainer
@@ -266,9 +261,7 @@ def generate_shap_values(explainer, X: pd.DataFrame) -> object:
 
 
 def plot_summary(
-    shap_values,
-    X: pd.DataFrame,
-    output_path: Optional[Path] = None
+    shap_values, X: pd.DataFrame, output_path: Optional[Path] = None
 ) -> Path:
     """
     Gera e salva o gráfico de resumo SHAP (força de cada feature).
@@ -308,10 +301,7 @@ def plot_summary(
     return output_path
 
 
-def plot_feature_importance(
-    shap_values,
-    output_path: Optional[Path] = None
-) -> Path:
+def plot_feature_importance(shap_values, output_path: Optional[Path] = None) -> Path:
     """
     Gera e salva o gráfico de importância de features baseado em SHAP.
 
@@ -351,7 +341,7 @@ def plot_feature_importance(
 def main(
     max_samples: int = MAX_SAMPLES,
     model_path: Optional[Path] = None,
-    features_path: Optional[Path] = None
+    features_path: Optional[Path] = None,
 ) -> None:
     """
     Orquestra a execução completa do pipeline de explainabilidade SHAP.

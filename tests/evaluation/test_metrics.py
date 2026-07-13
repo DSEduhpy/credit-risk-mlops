@@ -49,9 +49,7 @@ class TestComputeMetrics:
         result = compute_metrics(y_true, y_prob, threshold=0.5)
         for key in ("auc", "recall", "precision", "f1", "accuracy"):
             value = result[key]
-            assert 0.0 <= value <= 1.0, (
-                f"Metric '{key}' = {value} is outside [0, 1]"
-            )
+            assert 0.0 <= value <= 1.0, f"Metric '{key}' = {value} is outside [0, 1]"
 
     def test_perfect_auc(self):
         """A perfect classifier must yield AUC == 1.0."""
@@ -66,25 +64,25 @@ class TestComputeMetrics:
         y_true = rng.choice([0, 1], size=1000, p=[0.8, 0.2])
         y_prob = rng.uniform(0, 1, size=1000)
         result = compute_metrics(y_true, y_prob, threshold=0.5)
-        assert 0.3 < result["auc"] < 0.7, (
-            f"Random classifier AUC {result['auc']} is far from 0.5"
-        )
+        assert (
+            0.3 < result["auc"] < 0.7
+        ), f"Random classifier AUC {result['auc']} is far from 0.5"
 
     def test_high_threshold_low_recall(self, binary_labels):
         """At threshold=0.95, almost no positives are detected → recall near 0."""
         y_true, y_prob = binary_labels
         result = compute_metrics(y_true, y_prob, threshold=0.95)
-        assert result["recall"] <= 0.5, (
-            f"High threshold should yield low recall, got {result['recall']}"
-        )
+        assert (
+            result["recall"] <= 0.5
+        ), f"High threshold should yield low recall, got {result['recall']}"
 
     def test_low_threshold_high_recall(self, binary_labels):
         """At threshold=0.05, nearly all positives are detected → recall near 1."""
         y_true, y_prob = binary_labels
         result = compute_metrics(y_true, y_prob, threshold=0.05)
-        assert result["recall"] >= 0.5, (
-            f"Low threshold should yield high recall, got {result['recall']}"
-        )
+        assert (
+            result["recall"] >= 0.5
+        ), f"Low threshold should yield high recall, got {result['recall']}"
 
     def test_values_are_python_scalars(self, binary_labels):
         """All metric values must be plain Python floats or ints, not numpy scalars
@@ -92,6 +90,6 @@ class TestComputeMetrics:
         y_true, y_prob = binary_labels
         result = compute_metrics(y_true, y_prob, threshold=0.5)
         for key, value in result.items():
-            assert isinstance(value, (int, float)), (
-                f"Metric '{key}' returned {type(value)}, expected Python scalar"
-            )   
+            assert isinstance(
+                value, (int, float)
+            ), f"Metric '{key}' returned {type(value)}, expected Python scalar"

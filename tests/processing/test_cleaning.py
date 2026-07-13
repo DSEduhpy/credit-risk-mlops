@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
+from src.config import TARGET_COLUMN
 from src.processing.cleaning import clean_data
 
 
@@ -28,9 +28,9 @@ class TestCleanData:
     def test_no_rows_added(self, raw_dataframe: pd.DataFrame):
         """Cleaning must never add rows."""
         result = clean_data(raw_dataframe.copy())
-        assert len(result) <= len(raw_dataframe), (
-            "clean_data must not add rows to the dataset"
-        )
+        assert len(result) <= len(
+            raw_dataframe
+        ), "clean_data must not add rows to the dataset"
 
     def test_missing_rate_below_threshold(self, raw_dataframe: pd.DataFrame):
         """
@@ -39,37 +39,38 @@ class TestCleanData:
         """
         result = clean_data(raw_dataframe.copy())
         max_missing = result.isnull().mean().max()
-        assert max_missing <= 0.10, (
-            f"Cleaning left {max_missing:.1%} missing values in some column"
-        )
+        assert (
+            max_missing <= 0.10
+        ), f"Cleaning left {max_missing:.1%} missing values in some column"
 
     def test_target_column_preserved(self, raw_dataframe: pd.DataFrame):
-        """The loan_status (or default) column must survive cleaning."""
+        """The target column must survive cleaning and be normalized to the configured name."""
         result = clean_data(raw_dataframe.copy())
-        target_candidates = {"loan_status", "default"}
-        has_target = bool(target_candidates & set(result.columns))
-        assert has_target, "Target column was dropped during cleaning"
+        assert (
+            TARGET_COLUMN in result.columns
+        ), f"Target column '{TARGET_COLUMN}' was not present after cleaning"
 
     def test_idempotent(self, raw_dataframe: pd.DataFrame):
         """Applying clean_data twice must produce the same result as once."""
         once = clean_data(raw_dataframe.copy())
         twice = clean_data(once.copy())
         assert once.shape == twice.shape, "clean_data is not idempotent (shape changed)"
-        assert list(once.columns) == list(twice.columns), (
-            "clean_data is not idempotent (columns changed)"
-        )
+        assert list(once.columns) == list(
+            twice.columns
+        ), "clean_data is not idempotent (columns changed)"
 
     def test_numeric_columns_are_numeric(self, raw_dataframe: pd.DataFrame):
         """Known numeric columns must have numeric dtype after cleaning."""
         result = clean_data(raw_dataframe.copy())
         numeric_cols = [
-            c for c in ["loan_amnt", "int_rate", "annual_inc", "dti"]
+            c
+            for c in ["loan_amnt", "int_rate", "annual_inc", "dti"]
             if c in result.columns
         ]
         for col in numeric_cols:
-            assert pd.api.types.is_numeric_dtype(result[col]), (
-                f"Column '{col}' is not numeric after cleaning"
-            )
+            assert pd.api.types.is_numeric_dtype(
+                result[col]
+            ), f"Column '{col}' is not numeric after cleaning"
 
     def test_handles_completely_empty_column(self):
         """Columns that are 100% null should be dropped or imputed, not crash."""

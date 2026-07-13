@@ -19,17 +19,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.config.base import (
-    APIConfig,
-    BaseConfig,
-    BusinessConfig,
-    LoggingConfig,
-    MLflowConfig,
-    ModelConfig,
-    MonitoringConfig,
-    PathConfig,
-    ValidationConfig,
-)
+from src.config.base import (APIConfig, BaseConfig, LoggingConfig,
+                             MLflowConfig, ModelConfig, MonitoringConfig,
+                             PathConfig, ValidationConfig)
 
 # ---------------------------------------------------------------------------
 # Isolated test paths — tests must never read/write production data dirs
@@ -40,7 +32,7 @@ _TEST_ROOT = Path(__file__).resolve().parent.parent.parent / "tests" / "_fixture
 class _TestPathConfig(PathConfig):
     data_raw: Path = _TEST_ROOT / "data" / "raw"
     data_processed: Path = _TEST_ROOT / "data" / "processed"
-    data_features: Path = _TEST_ROOT / "data" / "features"
+    data_features: Path = _TEST_ROOT / "data" / "features.parquet"
     models: Path = _TEST_ROOT / "models"
     reports: Path = _TEST_ROOT / "reports"
     reports_figures: Path = _TEST_ROOT / "reports" / "figures"
@@ -49,7 +41,7 @@ class _TestPathConfig(PathConfig):
 
 
 class _TestLoggingConfig(LoggingConfig):
-    level: str = "WARNING"   # Suppress noise during test runs
+    level: str = "WARNING"  # Suppress noise during test runs
     json_format: bool = False
     log_to_file: bool = False
 
@@ -62,7 +54,7 @@ class _TestMLflowConfig(MLflowConfig):
 class _TestModelConfig(ModelConfig):
     random_state: int = 42
     test_size: float = 0.3
-    cv_folds: int = 2   # Faster in CI
+    cv_folds: int = 2  # Faster in CI
 
 
 class _TestMonitoringConfig(MonitoringConfig):
@@ -70,11 +62,11 @@ class _TestMonitoringConfig(MonitoringConfig):
 
 
 class _TestValidationConfig(ValidationConfig):
-    min_row_count: int = 10   # Tests use small synthetic datasets
+    min_row_count: int = 10  # Tests use small synthetic datasets
 
 
 class _TestAPIConfig(APIConfig):
-    port: int = 8001   # Avoid conflicts with running dev server
+    port: int = 8001  # Avoid conflicts with running dev server
 
 
 class TestConfig(BaseConfig):

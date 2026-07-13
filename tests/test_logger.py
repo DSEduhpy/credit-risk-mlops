@@ -20,27 +20,17 @@ import json
 import logging
 import time
 from io import StringIO
-from unittest.mock import patch
 
 import pytest
 
-from src.logger import (
-    StageTimer,
-    _HumanFormatter,
-    _JSONFormatter,
-    get_correlation_id,
-    get_logger,
-    log_drift_alert,
-    log_inference,
-    log_pipeline_stage,
-    pipeline_logger,
-    set_correlation_id,
-)
-
+from src.logger import (StageTimer, _HumanFormatter, _JSONFormatter,
+                        get_correlation_id, get_logger, log_drift_alert,
+                        log_inference, pipeline_logger, set_correlation_id)
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _capture_logger(logger_name: str, formatter_cls=None):
     """
@@ -64,6 +54,7 @@ def _capture_logger(logger_name: str, formatter_cls=None):
 # Tests: get_logger
 # ---------------------------------------------------------------------------
 
+
 class TestGetLogger:
     def test_returns_logger_instance(self):
         logger = get_logger("test.module")
@@ -83,6 +74,7 @@ class TestGetLogger:
 # Tests: Correlation ID
 # ---------------------------------------------------------------------------
 
+
 class TestCorrelationId:
     def test_set_returns_the_id(self):
         cid = set_correlation_id("my-custom-id")
@@ -96,9 +88,7 @@ class TestCorrelationId:
 
     def test_correlation_id_in_json_output(self):
         set_correlation_id("json-test-id")
-        logger, stream, handler = _capture_logger(
-            "test.json.cid", _JSONFormatter
-        )
+        logger, stream, handler = _capture_logger("test.json.cid", _JSONFormatter)
         try:
             logger.info("test message")
             output = stream.getvalue().strip()
@@ -111,6 +101,7 @@ class TestCorrelationId:
 # ---------------------------------------------------------------------------
 # Tests: JSON formatter
 # ---------------------------------------------------------------------------
+
 
 class TestJSONFormatter:
     def test_output_is_valid_json(self):
@@ -178,11 +169,10 @@ class TestJSONFormatter:
 # Tests: Human formatter
 # ---------------------------------------------------------------------------
 
+
 class TestHumanFormatter:
     def test_output_is_string(self):
-        logger, stream, handler = _capture_logger(
-            "test.human.format", _HumanFormatter
-        )
+        logger, stream, handler = _capture_logger("test.human.format", _HumanFormatter)
         try:
             logger.info("human readable message")
             output = stream.getvalue()
@@ -192,9 +182,7 @@ class TestHumanFormatter:
             logger.removeHandler(handler)
 
     def test_level_in_output(self):
-        logger, stream, handler = _capture_logger(
-            "test.human.level", _HumanFormatter
-        )
+        logger, stream, handler = _capture_logger("test.human.level", _HumanFormatter)
         try:
             logger.error("an error occurred")
             output = stream.getvalue()
@@ -206,6 +194,7 @@ class TestHumanFormatter:
 # ---------------------------------------------------------------------------
 # Tests: pipeline_logger
 # ---------------------------------------------------------------------------
+
 
 class TestPipelineLogger:
     def test_namespace_is_prefixed(self):
@@ -220,6 +209,7 @@ class TestPipelineLogger:
 # ---------------------------------------------------------------------------
 # Tests: log_inference
 # ---------------------------------------------------------------------------
+
 
 class TestLogInference:
     def test_emits_record(self):
@@ -247,8 +237,11 @@ class TestLogInference:
         logger, stream, handler = _capture_logger("inference", _JSONFormatter)
         try:
             log_inference(
-                request_id="r1", model="xgboost",
-                prediction=0.2, latency_ms=5.0, threshold=0.5
+                request_id="r1",
+                model="xgboost",
+                prediction=0.2,
+                latency_ms=5.0,
+                threshold=0.5,
             )
             record = json.loads(stream.getvalue().strip())
             assert record["decision"] == "approved"
@@ -259,8 +252,11 @@ class TestLogInference:
         logger, stream, handler = _capture_logger("inference", _JSONFormatter)
         try:
             log_inference(
-                request_id="r2", model="xgboost",
-                prediction=0.8, latency_ms=5.0, threshold=0.5
+                request_id="r2",
+                model="xgboost",
+                prediction=0.8,
+                latency_ms=5.0,
+                threshold=0.5,
             )
             record = json.loads(stream.getvalue().strip())
             assert record["decision"] == "denied"
@@ -272,11 +268,10 @@ class TestLogInference:
 # Tests: log_drift_alert
 # ---------------------------------------------------------------------------
 
+
 class TestLogDriftAlert:
     def test_warning_severity_maps_to_warning_level(self):
-        logger, stream, handler = _capture_logger(
-            "monitoring.drift", _JSONFormatter
-        )
+        logger, stream, handler = _capture_logger("monitoring.drift", _JSONFormatter)
         try:
             log_drift_alert("annual_inc", "PSI", 0.15, 0.10, severity="WARNING")
             output = stream.getvalue().strip()
@@ -286,9 +281,7 @@ class TestLogDriftAlert:
             logger.removeHandler(handler)
 
     def test_critical_severity_maps_to_critical_level(self):
-        logger, stream, handler = _capture_logger(
-            "monitoring.drift", _JSONFormatter
-        )
+        logger, stream, handler = _capture_logger("monitoring.drift", _JSONFormatter)
         try:
             log_drift_alert("dti", "KS", 0.25, 0.10, severity="CRITICAL")
             output = stream.getvalue().strip()
@@ -298,9 +291,7 @@ class TestLogDriftAlert:
             logger.removeHandler(handler)
 
     def test_record_contains_feature_name(self):
-        logger, stream, handler = _capture_logger(
-            "monitoring.drift", _JSONFormatter
-        )
+        logger, stream, handler = _capture_logger("monitoring.drift", _JSONFormatter)
         try:
             log_drift_alert("revol_util", "wasserstein", 0.08, 0.05, "WARNING")
             record = json.loads(stream.getvalue().strip())
@@ -313,34 +304,30 @@ class TestLogDriftAlert:
 # Tests: StageTimer
 # ---------------------------------------------------------------------------
 
+
 class TestStageTimer:
     def test_logs_started_and_completed(self):
-        logger, stream, handler = _capture_logger(
-            "pipeline.timer_test", _JSONFormatter
-        )
+        logger, stream, handler = _capture_logger("pipeline.timer_test", _JSONFormatter)
         try:
             with StageTimer("timer_test"):
                 pass
-            lines = [l for l in stream.getvalue().strip().split("\n") if l]
-            statuses = [json.loads(l).get("status") for l in lines]
+            log_lines = [line for line in stream.getvalue().strip().split("\n") if line]
+            statuses = [json.loads(log_line).get("status") for log_line in log_lines]
             assert "started" in statuses, "StageTimer did not log 'started'"
             assert "completed" in statuses, "StageTimer did not log 'completed'"
         finally:
             logger.removeHandler(handler)
 
     def test_logs_failed_on_exception(self):
-        logger, stream, handler = _capture_logger(
-            "pipeline.fail_test", _JSONFormatter
-        )
+        logger, stream, handler = _capture_logger("pipeline.fail_test", _JSONFormatter)
         try:
             with pytest.raises(RuntimeError):
                 with StageTimer("fail_test"):
                     raise RuntimeError("deliberate failure")
-            lines = [l for l in stream.getvalue().strip().split("\n") if l]
-            statuses = [json.loads(l).get("status") for l in lines]
-            assert "failed" in statuses, (
-                "StageTimer did not log 'failed' on exception"
-            )
+            lines = [line for line in stream.getvalue().strip().split("\n") if line]
+
+            statuses = [json.loads(line).get("status") for line in lines]
+            assert "failed" in statuses, "StageTimer did not log 'failed' on exception"
         finally:
             logger.removeHandler(handler)
 
@@ -351,15 +338,17 @@ class TestStageTimer:
         try:
             with StageTimer("duration_test"):
                 time.sleep(0.01)
-            lines = [l for l in stream.getvalue().strip().split("\n") if l]
+            lines = [line for line in stream.getvalue().strip().split("\n") if line]
+
             completed = [
-                json.loads(l) for l in lines
-                if json.loads(l).get("status") == "completed"
+                json.loads(line)
+                for line in lines
+                if json.loads(line).get("status") == "completed"
             ]
             assert completed, "No 'completed' record found"
-            assert "duration_seconds" in completed[0], (
-                "StageTimer completion record missing duration_seconds"
-            )
+            assert (
+                "duration_seconds" in completed[0]
+            ), "StageTimer completion record missing duration_seconds"
             assert completed[0]["duration_seconds"] >= 0.005
         finally:
             logger.removeHandler(handler)

@@ -4,25 +4,31 @@ Validação de schema e estrutura de dados.
 Implementa validações de schema, tipos de dados e estrutura esperada.
 """
 
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Tuple
 
-import numpy as np
 import pandas as pd
 
+from src.config import TARGET_COLUMN
 from src.logger import get_logger
 
 logger = get_logger(__name__)
 
 # Schema esperado para dataset de risco de crédito
 EXPECTED_SCHEMA = {
-    "TARGET": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
+    TARGET_COLUMN: {"dtype": "int64", "nullable": False, "categories": [0, 1]},
     "AMT_INCOME_TOTAL": {"dtype": "float64", "nullable": False, "min": 0},
-    "DAYS_BIRTH": {"dtype": "int64", "nullable": False, "max": 0},  # Valores negativos
+    # Valores negativos
+    "DAYS_BIRTH": {"dtype": "int64", "nullable": False, "max": 0},
     "DAYS_EMPLOYED": {"dtype": "int64", "nullable": True},
     "AMT_CREDIT": {"dtype": "float64", "nullable": False, "min": 0},
     "AMT_ANNUITY": {"dtype": "float64", "nullable": True, "min": 0},
     "AMT_GOODS_PRICE": {"dtype": "float64", "nullable": True, "min": 0},
-    "REGION_POPULATION_RELATIVE": {"dtype": "float64", "nullable": False, "min": 0, "max": 1},
+    "REGION_POPULATION_RELATIVE": {
+        "dtype": "float64",
+        "nullable": False,
+        "min": 0,
+        "max": 1,
+    },
     "DAYS_ID_PUBLISH": {"dtype": "int64", "nullable": False},
     "FLAG_MOBIL": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
     "FLAG_EMP_PHONE": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
@@ -32,23 +38,65 @@ EXPECTED_SCHEMA = {
     "FLAG_EMAIL": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
     "OCCUPATION_TYPE": {"dtype": "object", "nullable": True},
     "CNT_FAM_MEMBERS": {"dtype": "float64", "nullable": False, "min": 1},
-    "REGION_RATING_CLIENT": {"dtype": "int64", "nullable": False, "categories": [1, 2, 3]},
-    "REGION_RATING_CLIENT_W_CITY": {"dtype": "int64", "nullable": False, "categories": [1, 2, 3]},
+    "REGION_RATING_CLIENT": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [1, 2, 3],
+    },
+    "REGION_RATING_CLIENT_W_CITY": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [1, 2, 3],
+    },
     "WEEKDAY_APPR_PROCESS_START": {"dtype": "object", "nullable": False},
-    "HOUR_APPR_PROCESS_START": {"dtype": "int64", "nullable": False, "min": 0, "max": 23},
-    "REG_REGION_NOT_LIVE_REGION": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
-    "REG_REGION_NOT_WORK_REGION": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
-    "LIVE_REGION_NOT_WORK_REGION": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
-    "REG_CITY_NOT_LIVE_CITY": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
-    "REG_CITY_NOT_WORK_CITY": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
-    "LIVE_CITY_NOT_WORK_CITY": {"dtype": "int64", "nullable": False, "categories": [0, 1]},
+    "HOUR_APPR_PROCESS_START": {
+        "dtype": "int64",
+        "nullable": False,
+        "min": 0,
+        "max": 23,
+    },
+    "REG_REGION_NOT_LIVE_REGION": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [0, 1],
+    },
+    "REG_REGION_NOT_WORK_REGION": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [0, 1],
+    },
+    "LIVE_REGION_NOT_WORK_REGION": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [0, 1],
+    },
+    "REG_CITY_NOT_LIVE_CITY": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [0, 1],
+    },
+    "REG_CITY_NOT_WORK_CITY": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [0, 1],
+    },
+    "LIVE_CITY_NOT_WORK_CITY": {
+        "dtype": "int64",
+        "nullable": False,
+        "categories": [0, 1],
+    },
     "ORGANIZATION_TYPE": {"dtype": "object", "nullable": False},
     "EXT_SOURCE_1": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "EXT_SOURCE_2": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "EXT_SOURCE_3": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "APARTMENTS_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "BASEMENTAREA_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
-    "YEARS_BEGINEXPLUATATION_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
+    "YEARS_BEGINEXPLUATATION_AVG": {
+        "dtype": "float64",
+        "nullable": True,
+        "min": 0,
+        "max": 1,
+    },
     "YEARS_BUILD_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "COMMONAREA_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "ELEVATORS_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
@@ -58,11 +106,21 @@ EXPECTED_SCHEMA = {
     "LANDAREA_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "LIVINGAPARTMENTS_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "LIVINGAREA_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
-    "NONLIVINGAPARTMENTS_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
+    "NONLIVINGAPARTMENTS_AVG": {
+        "dtype": "float64",
+        "nullable": True,
+        "min": 0,
+        "max": 1,
+    },
     "NONLIVINGAREA_AVG": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "APARTMENTS_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "BASEMENTAREA_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
-    "YEARS_BEGINEXPLUATATION_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
+    "YEARS_BEGINEXPLUATATION_MODE": {
+        "dtype": "float64",
+        "nullable": True,
+        "min": 0,
+        "max": 1,
+    },
     "YEARS_BUILD_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "COMMONAREA_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "ELEVATORS_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
@@ -72,11 +130,21 @@ EXPECTED_SCHEMA = {
     "LANDAREA_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "LIVINGAPARTMENTS_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "LIVINGAREA_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
-    "NONLIVINGAPARTMENTS_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
+    "NONLIVINGAPARTMENTS_MODE": {
+        "dtype": "float64",
+        "nullable": True,
+        "min": 0,
+        "max": 1,
+    },
     "NONLIVINGAREA_MODE": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "APARTMENTS_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "BASEMENTAREA_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
-    "YEARS_BEGINEXPLUATATION_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
+    "YEARS_BEGINEXPLUATATION_MEDI": {
+        "dtype": "float64",
+        "nullable": True,
+        "min": 0,
+        "max": 1,
+    },
     "YEARS_BUILD_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "COMMONAREA_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "ELEVATORS_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
@@ -86,7 +154,12 @@ EXPECTED_SCHEMA = {
     "LANDAREA_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "LIVINGAPARTMENTS_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "LIVINGAREA_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
-    "NONLIVINGAPARTMENTS_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
+    "NONLIVINGAPARTMENTS_MEDI": {
+        "dtype": "float64",
+        "nullable": True,
+        "min": 0,
+        "max": 1,
+    },
     "NONLIVINGAREA_MEDI": {"dtype": "float64", "nullable": True, "min": 0, "max": 1},
     "FONDKAPREMONT_MODE": {"dtype": "object", "nullable": True},
     "HOUSETYPE_MODE": {"dtype": "object", "nullable": True},
@@ -129,7 +202,7 @@ EXPECTED_SCHEMA = {
 REQUIRED_COLUMNS = [
     "loan_amnt",
     "annual_inc",
-    "default",
+    TARGET_COLUMN,
 ]
 
 
@@ -155,9 +228,9 @@ def validate_required_columns(df: pd.DataFrame) -> Tuple[bool, List[str]]:
 
 def validate_column_types(df):
     EXPECTED_DTYPES = {
-    "loan_amnt": "float64",
-    "annual_inc": "float64",
-    "default": "int64",
+        "loan_amnt": "float64",
+        "annual_inc": "float64",
+        "default": "int64",
     }
 
     for col, expected_dtype in EXPECTED_DTYPES.items():
@@ -219,7 +292,9 @@ def validate_ranges(df: pd.DataFrame) -> Dict[str, Dict]:
         }
 
         if not is_valid:
-            logger.warning(f"Violação de range em {col}: {total_violations} valores fora do esperado")
+            logger.warning(
+                f"Violação de range em {col}: {total_violations} valores fora do esperado"
+            )
 
     return results
 
@@ -286,7 +361,9 @@ def validate_cardinality(df: pd.DataFrame) -> Dict[str, Dict]:
         }
 
         if not is_valid:
-            logger.warning(f"Cardinalidade suspeita em {col}: {unique_count} valores únicos")
+            logger.warning(
+                f"Cardinalidade suspeita em {col}: {unique_count} valores únicos"
+            )
 
     return results
 
@@ -317,7 +394,9 @@ def validate_schema(df):
     return results
 
 
-def detect_schema_drift(reference_df: pd.DataFrame, current_df: pd.DataFrame) -> Dict[str, List[str]]:
+def detect_schema_drift(
+    reference_df: pd.DataFrame, current_df: pd.DataFrame
+) -> Dict[str, List[str]]:
     """
     Detecta mudanças de schema entre datasets.
 
@@ -340,11 +419,13 @@ def detect_schema_drift(reference_df: pd.DataFrame, current_df: pd.DataFrame) ->
         ref_dtype = str(reference_df[col].dtype)
         curr_dtype = str(current_df[col].dtype)
         if ref_dtype != curr_dtype:
-            dtype_changes.append({
-                "column": col,
-                "reference_dtype": ref_dtype,
-                "current_dtype": curr_dtype,
-            })
+            dtype_changes.append(
+                {
+                    "column": col,
+                    "reference_dtype": ref_dtype,
+                    "current_dtype": curr_dtype,
+                }
+            )
 
     results = {
         "added_columns": added_columns,

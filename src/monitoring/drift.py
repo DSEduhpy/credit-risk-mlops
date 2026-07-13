@@ -6,25 +6,25 @@ para detecção de drift estatístico entre datasets de referência e produção
 """
 
 import json
-import math
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 
-from src.config import FEATURES_PATH, PROJECT_ROOT
+from src.config import FEATURES_PATH, REPORTS_PATH
 from src.logger import get_logger
 
 logger = get_logger(__name__)
 
-# Paths para relatórios
-REPORTS_PATH = PROJECT_ROOT.parent / "reports" / "drift"
-FIGURES_PATH = REPORTS_PATH / "figures"
+# Paths para relatórios de drift
+DRIFT_REPORTS_PATH = REPORTS_PATH / "drift"
+DRIFT_FIGURES_PATH = DRIFT_REPORTS_PATH / "figures"
 
 # Tentativa de importar bibliotecas opcionais
 try:
     from scipy.stats import ks_2samp
+
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
@@ -32,6 +32,7 @@ except ImportError:
 
 try:
     import matplotlib.pyplot as plt
+
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
@@ -198,18 +199,18 @@ def plot_drift_distribution(
     plt.figure(figsize=(10, 6))
 
     # Histogramas
-    plt.hist(ref_data, alpha=0.7, label='Referência', bins=30, density=True)
-    plt.hist(curr_data, alpha=0.7, label='Atual', bins=30, density=True)
+    plt.hist(ref_data, alpha=0.7, label="Referência", bins=30, density=True)
+    plt.hist(curr_data, alpha=0.7, label="Atual", bins=30, density=True)
 
-    plt.title(f'Distribuição - {feature}')
-    plt.xlabel('Valor')
-    plt.ylabel('Densidade')
+    plt.title(f"Distribuição - {feature}")
+    plt.xlabel("Valor")
+    plt.ylabel("Densidade")
     plt.legend()
     plt.grid(True, alpha=0.3)
 
     if save_path:
         save_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        plt.savefig(save_path, dpi=150, bbox_inches="tight")
         logger.info(f"Visualização salva em {save_path}")
     else:
         plt.show()
@@ -254,24 +255,26 @@ def generate_drift_report(
         )
 
         # Calcular KS Test
-        ks_stat, p_value = calculate_ks_test(
-            reference_df[feature], current_df[feature]
-        )
+        ks_stat, p_value = calculate_ks_test(reference_df[feature], current_df[feature])
 
         # Verificar drift severo
         if drift_level == "severe_drift":
-            logger.warning(f"Drift severo detectado em {feature} (PSI: {psi_value:.4f})")
+            logger.warning(
+                f"Drift severo detectado em {feature} (PSI: {psi_value:.4f})"
+            )
 
-        report_data.append({
-            "feature": feature,
-            "psi": psi_value,
-            "ks_statistic": ks_stat,
-            "p_value": p_value,
-            "drift_level": drift_level,
-        })
+        report_data.append(
+            {
+                "feature": feature,
+                "psi": psi_value,
+                "ks_statistic": ks_stat,
+                "p_value": p_value,
+                "drift_level": drift_level,
+            }
+        )
 
         # Gerar visualização
-        fig_path = FIGURES_PATH / f"{feature}_drift.png"
+        fig_path = DRIFT_FIGURES_PATH / f"{feature}_drift.png"
         plot_drift_distribution(
             reference_df[feature],
             current_df[feature],
@@ -289,17 +292,17 @@ def save_drift_report(report_df: pd.DataFrame) -> None:
     Args:
         report_df: DataFrame com relatório
     """
-    REPORTS_PATH.mkdir(parents=True, exist_ok=True)
+    DRIFT_REPORTS_PATH.mkdir(parents=True, exist_ok=True)
 
     # Salvar CSV
-    csv_path = REPORTS_PATH / "drift_report.csv"
+    csv_path = DRIFT_REPORTS_PATH / "drift_report.csv"
     report_df.to_csv(csv_path, index=False)
     logger.info(f"Relatório CSV salvo em {csv_path}")
 
     # Salvar JSON
-    json_path = REPORTS_PATH / "drift_report.json"
-    report_dict = report_df.to_dict('records')
-    with open(json_path, 'w', encoding='utf-8') as f:
+    json_path = DRIFT_REPORTS_PATH / "drift_report.json"
+    report_dict = report_df.to_dict("records")
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(report_dict, f, indent=2, ensure_ascii=False)
     logger.info(f"Relatório JSON salvo em {json_path}")
 

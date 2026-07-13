@@ -1,11 +1,8 @@
 from typing import Optional, Sequence
 
 import matplotlib.pyplot as plt
-from sklearn.metrics import (
-    ConfusionMatrixDisplay,
-    PrecisionRecallDisplay,
-    RocCurveDisplay,
-)
+from sklearn.metrics import (ConfusionMatrixDisplay, PrecisionRecallDisplay,
+                             RocCurveDisplay)
 
 
 def plot_roc_curve(

@@ -14,7 +14,6 @@ Responsabilidades:
 # pylint: disable=invalid-name
 
 import time
-
 from dataclasses import dataclass
 from typing import Any
 
@@ -22,45 +21,16 @@ import joblib
 import mlflow
 import pandas as pd
 
-from src.config import (
-    MLFLOW_TRACKING_URI,
-    PROJECT_ROOT,
-)
-
+from src.config import MLFLOW_TRACKING_URI, settings
+from src.evaluation.business_metrics import simulate_business_metrics
+from src.evaluation.metrics import compute_metrics
+from src.evaluation.threshold import optimize_threshold
 from src.logger import get_logger
-
-from src.modeling.data import (
-    load_features,
-    split_data,
-)
-
-from src.modeling.models.logistic import (
-    build_logistic_model,
-)
-
-from src.modeling.models.xgboost import (
-    build_xgboost_model,
-)
-
-from src.modeling.models.lightgbm import (
-    build_lightgbm_model,
-)
-
-from src.modeling.models.catboost import (
-    build_catboost_model,
-)
-
-from src.evaluation.metrics import (
-    compute_metrics,
-)
-
-from src.evaluation.threshold import (
-    optimize_threshold,
-)
-
-from src.evaluation.business_metrics import (
-    simulate_business_metrics,
-)
+from src.modeling.data import load_features, split_data
+from src.modeling.models.catboost import build_catboost_model
+from src.modeling.models.lightgbm import build_lightgbm_model
+from src.modeling.models.logistic import build_logistic_model
+from src.modeling.models.xgboost import build_xgboost_model
 
 logger = get_logger(__name__)
 
@@ -211,11 +181,7 @@ def log_to_mlflow(
         # ==========================================================
         # Persistência do modelo
         # ==========================================================
-        model_path = (
-            PROJECT_ROOT.parent
-            / "models"
-            / f"{model_name}.pkl"
-        )
+        model_path = settings.paths.models / f"{model_name}.pkl"
 
         model_path.parent.mkdir(
             parents=True,
@@ -258,9 +224,7 @@ def print_leaderboard(
         precision = result["metrics"].get("precision", 0)
         recall = result["metrics"].get("recall", 0)
 
-        resultado = result[
-            "business_metrics"
-        ].get("resultado", 0)
+        resultado = result["business_metrics"].get("resultado", 0)
 
         print(
             f"{result['model_name']:<12} | "
@@ -278,20 +242,14 @@ def train() -> None:
     Executa benchmark multi-modelo.
     """
 
-    logger.info(
-        "Iniciando benchmark multi-modelo"
-    )
+    logger.info("Iniciando benchmark multi-modelo")
 
     # ==========================================================
     # Configuração MLflow
     # ==========================================================
-    mlflow.set_tracking_uri(
-        MLFLOW_TRACKING_URI
-    )
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
-    mlflow.set_experiment(
-        "credit_risk_benchmark"
-    )
+    mlflow.set_experiment("credit_risk_benchmark")
 
     # ==========================================================
     # Dados
@@ -318,7 +276,7 @@ def train() -> None:
             model_name=model_name,
             model_func=model_func,
             data=dataset,
-    )
+        )
 
         # MLflow
         log_to_mlflow(

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from src.processing.feature_engineering import engineer_features
 
@@ -28,9 +27,9 @@ class TestEngineerFeatures:
     def test_loan_amnt_to_income_computed(self, raw_dataframe: pd.DataFrame):
         """loan_amnt_to_income = loan_amnt / annual_inc must be present and positive."""
         result = engineer_features(raw_dataframe.copy())
-        assert "loan_amnt_to_income" in result.columns, (
-            "loan_amnt_to_income feature is missing"
-        )
+        assert (
+            "loan_amnt_to_income" in result.columns
+        ), "loan_amnt_to_income feature is missing"
         non_null = result["loan_amnt_to_income"].dropna()
         assert (non_null >= 0).all(), "loan_amnt_to_income contains negative values"
 
@@ -45,13 +44,13 @@ class TestEngineerFeatures:
     def test_home_ownership_encoded(self, raw_dataframe: pd.DataFrame):
         """home_ownership_encoded must be an integer-typed column."""
         result = engineer_features(raw_dataframe.copy())
-        assert "home_ownership_encoded" in result.columns, (
-            "home_ownership_encoded feature is missing"
-        )
+        assert (
+            "home_ownership_encoded" in result.columns
+        ), "home_ownership_encoded feature is missing"
         dtype = result["home_ownership_encoded"].dtype
-        assert pd.api.types.is_numeric_dtype(dtype), (
-            f"home_ownership_encoded has non-numeric dtype: {dtype}"
-        )
+        assert pd.api.types.is_numeric_dtype(
+            dtype
+        ), f"home_ownership_encoded has non-numeric dtype: {dtype}"
 
     def test_purpose_encoded(self, raw_dataframe: pd.DataFrame):
         """purpose_encoded must be numeric."""
@@ -69,25 +68,25 @@ class TestEngineerFeatures:
         result = engineer_features(df)
         if "fico_avg" in result.columns:
             null_count = result["fico_avg"].isnull().sum()
-            assert null_count == 0, (
-                f"fico_avg has {null_count} nulls despite complete fico inputs"
-            )
+            assert (
+                null_count == 0
+            ), f"fico_avg has {null_count} nulls despite complete fico inputs"
 
     def test_row_count_preserved(self, raw_dataframe: pd.DataFrame):
         """Feature engineering must not drop rows."""
         result = engineer_features(raw_dataframe.copy())
-        assert len(result) == len(raw_dataframe), (
-            f"Row count changed: {len(raw_dataframe)} → {len(result)}"
-        )
+        assert len(result) == len(
+            raw_dataframe
+        ), f"Row count changed: {len(raw_dataframe)} → {len(result)}"
 
     def test_does_not_mutate_input(self, raw_dataframe: pd.DataFrame):
         """engineer_features must not modify the input DataFrame in place."""
         df_copy = raw_dataframe.copy()
         original_cols = set(df_copy.columns)
         _ = engineer_features(raw_dataframe.copy())
-        assert set(raw_dataframe.columns) == original_cols, (
-            "engineer_features mutated the input DataFrame's columns"
-        )
+        assert (
+            set(raw_dataframe.columns) == original_cols
+        ), "engineer_features mutated the input DataFrame's columns"
 
     def test_loan_amnt_to_income_formula(self):
         """Verify the ratio formula directly on a controlled DataFrame."""

@@ -2,11 +2,11 @@
 Módulo de ingestão de dados.
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from src.logger import get_logger
 from src.config import RAW_CSV_PATH, RAW_DATA_PATH
+from src.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -18,16 +18,17 @@ def generate_synthetic_data(n_samples: int = 5000) -> pd.DataFrame:
 
     rng = np.random.default_rng(42)
 
-    data = pd.DataFrame({
-        "AMT_INCOME_TOTAL": rng.normal(150000, 50000, n_samples),
-        "DAYS_BIRTH": rng.integers(-25000, -7000, n_samples),
-        "TARGET": rng.integers(0, 2, n_samples),
-        "CODE_GENDER": rng.choice(["M", "F"], n_samples),
-        "NAME_CONTRACT_TYPE": rng.choice(
-            ["Cash loans", "Revolving loans"],
-            n_samples
-        ),
-    })
+    data = pd.DataFrame(
+        {
+            "AMT_INCOME_TOTAL": rng.normal(150000, 50000, n_samples),
+            "DAYS_BIRTH": rng.integers(-25000, -7000, n_samples),
+            "TARGET": rng.integers(0, 2, n_samples),
+            "CODE_GENDER": rng.choice(["M", "F"], n_samples),
+            "NAME_CONTRACT_TYPE": rng.choice(
+                ["Cash loans", "Revolving loans"], n_samples
+            ),
+        }
+    )
 
     return data
 
@@ -41,9 +42,7 @@ def load_data() -> None:
     # ==========================================================
     if RAW_CSV_PATH.exists():
 
-        logger.info(
-            f"Lendo dataset real: {RAW_CSV_PATH}"
-        )
+        logger.info(f"Lendo dataset real: {RAW_CSV_PATH}")
 
         df = pd.read_csv(RAW_CSV_PATH)
 
@@ -53,8 +52,7 @@ def load_data() -> None:
     else:
 
         logger.warning(
-            "Dataset real não encontrado. "
-            "Gerando dataset sintético para CI/CD."
+            "Dataset real não encontrado. " "Gerando dataset sintético para CI/CD."
         )
 
         df = generate_synthetic_data()

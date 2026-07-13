@@ -11,57 +11,130 @@ logger = get_logger(__name__)
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Clean raw loan dataset and return a cleaned DataFrame.
+    Realiza a limpeza do dataset bruto.
+
+    Etapas:
+        1. Criação da variável alvo (Target Engineering)
+        2. Remoção de colunas irrelevantes
+        3. Remoção de duplicatas
+        4. Tratamento de valores ausentes
+        5. Criação de features auxiliares
     """
 
     logger.info("Iniciando limpeza de dados")
 
-    # evita mutação do dataframe original
+    # ==========================================================
+    # Evita modificar o DataFrame original recebido pela função
+    # ==========================================================
     df = df.copy()
 
     initial_shape = df.shape
 
-    # remover IDs irrelevantes
+    # ==========================================================
+    # 1. TARGET ENGINEERING
+    # ==========================================================
+    # Converte o status do empréstimo em uma variável binária:
+    #
+    # Fully Paid  -> 0 (Bom pagador)
+    # Charged Off -> 1 (Inadimplente)
+    #
+    # Após criar a variável alvo, a coluna original é removida
+    # para evitar Data Leakage.
+    # ==========================================================
+    if "loan_status" in df.columns:
+
+        logger.info("Criando variável alvo")
+
+        target_mapping = {
+            "Fully Paid": 0,
+            "Charged Off": 1,
+        }
+
+        # Mapeia os valores textuais para 0 e 1
+        df[TARGET_COLUMN] = df["loan_status"].map(target_mapping)
+
+        # Remove registros cujo status não foi mapeado
+        df = df.dropna(subset=[TARGET_COLUMN])
+
+        # Converte definitivamente para inteiro
+        df[TARGET_COLUMN] = df[TARGET_COLUMN].astype(int)
+
+        # Remove a coluna original
+        df = df.drop(columns=["loan_status"])
+
+        logger.info(
+            "Target criada",
+            extra={
+                "target": TARGET_COLUMN,
+                "positives": int(df[TARGET_COLUMN].sum()),
+                "rows": len(df),
+            },
+        )
+
+    # ==========================================================
+    # 2. REMOÇÃO DE COLUNAS IRRELEVANTES
+    # ==========================================================
     if "SK_ID_CURR" in df.columns:
         df = df.drop(columns=["SK_ID_CURR"])
 
-    # remover duplicatas
+    # ==========================================================
+    # 3. REMOÇÃO DE DUPLICATAS
+    # ==========================================================
     df = df.drop_duplicates()
 
-    # remover colunas com missing extremo
+    # ==========================================================
+    # 4. REMOÇÃO DE COLUNAS COM MUITOS NULOS
+    # Remove colunas com mais de 90% de valores ausentes.
+    # ==========================================================
     missing_rate = df.isna().mean()
-    high_missing_cols = missing_rate[missing_rate > 0.9].index.tolist()
+
+    high_missing_cols = missing_rate[missing_rate > 0.90].index.tolist()
 
     if high_missing_cols:
+
         df = df.drop(columns=high_missing_cols)
 
         logger.info(
-            "Removendo colunas com alto missing",
+            "Removendo colunas com alto percentual de missing",
             extra={"columns": high_missing_cols},
         )
 
-    # preencher numéricos
+    # ==========================================================
+    # 5. IMPUTAÇÃO DE VALORES NUMÉRICOS
+    #
+    # A mediana é utilizada por ser robusta contra outliers.
+    # A coluna alvo NÃO deve sofrer imputação.
+    # ==========================================================
     numeric_cols = df.select_dtypes(include=["number"]).columns
 
     for col in numeric_cols:
+
         if col == TARGET_COLUMN:
             continue
 
         median_value = df[col].median()
 
-        # coluna completamente vazia
         if pd.isna(median_value):
             median_value = 0
 
         df[col] = df[col].fillna(median_value)
 
-    # preencher categóricos
+    # ==========================================================
+    # 6. IMPUTAÇÃO DE VARIÁVEIS CATEGÓRICAS
+    #
+    # Valores ausentes recebem a categoria "missing".
+    # ==========================================================
     categorical_cols = df.select_dtypes(include=["object"]).columns
 
     for col in categorical_cols:
         df[col] = df[col].fillna("missing")
 
-    # feature opcional
+    # ==========================================================
+    # 7. FEATURE AUXILIAR
+    #
+    # Aplica transformação logarítmica para reduzir assimetria
+    # da distribuição da renda.
+    # ==========================================================
     if "AMT_INCOME_TOTAL" in df.columns:
         df["AMT_INCOME_TOTAL_LOG"] = np.log1p(df["AMT_INCOME_TOTAL"])
 
@@ -72,6 +145,8 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         extra={
             "initial_shape": initial_shape,
             "final_shape": final_shape,
+            "rows_removed": initial_shape[0] - final_shape[0],
+            "columns_removed": initial_shape[1] - final_shape[1],
         },
     )
 

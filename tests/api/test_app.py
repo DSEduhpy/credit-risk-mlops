@@ -15,20 +15,18 @@ These tests use FastAPI's TestClient so no running server is needed.
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-
 # TestClient import — starlette is a FastAPI dependency, always available
 from fastapi.testclient import TestClient
-
 
 # ---------------------------------------------------------------------------
 # We import the app lazily inside fixtures to allow model-loading patches
 # to be in place before the module-level startup code runs.
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="module")
 def mock_model():
@@ -47,10 +45,11 @@ def test_client(mock_model):
     - joblib.load: returns mock_model regardless of path
     - MLflow: suppressed to avoid tracking during tests
     """
-    with patch("joblib.load", return_value=mock_model), \
-         patch("mlflow.set_experiment"), \
-         patch("mlflow.start_run"):
+    with patch("joblib.load", return_value=mock_model), patch(
+        "mlflow.set_experiment"
+    ), patch("mlflow.start_run"):
         from src.api.app import app
+
         client = TestClient(app, raise_server_exceptions=True)
         yield client
 
@@ -84,20 +83,21 @@ def valid_payload():
 # Health endpoint
 # ---------------------------------------------------------------------------
 
+
 class TestHealthEndpoint:
     """Tests for the /health endpoint."""
 
     def test_health_returns_200(self, test_client: TestClient):
         response = test_client.get("/health")
-        assert response.status_code == 200, (
-            f"Expected 200, got {response.status_code}: {response.text}"
-        )
+        assert (
+            response.status_code == 200
+        ), f"Expected 200, got {response.status_code}: {response.text}"
 
     def test_health_returns_json(self, test_client: TestClient):
         response = test_client.get("/health")
-        assert response.headers["content-type"].startswith("application/json"), (
-            "Health endpoint must return JSON"
-        )
+        assert response.headers["content-type"].startswith(
+            "application/json"
+        ), "Health endpoint must return JSON"
 
     def test_health_payload_has_status(self, test_client: TestClient):
         response = test_client.get("/health")
@@ -107,32 +107,35 @@ class TestHealthEndpoint:
     def test_health_status_is_healthy(self, test_client: TestClient):
         response = test_client.get("/health")
         body = response.json()
-        assert body["status"] in ("ok", "healthy", "up"), (
-            f"Unexpected health status: {body['status']}"
-        )
+        assert body["status"] in (
+            "ok",
+            "healthy",
+            "up",
+        ), f"Unexpected health status: {body['status']}"
 
 
 # ---------------------------------------------------------------------------
 # Predict endpoint
 # ---------------------------------------------------------------------------
 
+
 class TestPredictEndpoint:
     """Tests for the /predict endpoint."""
 
     def test_predict_returns_200(self, test_client: TestClient, valid_payload: dict):
         response = test_client.post("/predict", json=valid_payload)
-        assert response.status_code == 200, (
-            f"Expected 200, got {response.status_code}: {response.text}"
-        )
+        assert (
+            response.status_code == 200
+        ), f"Expected 200, got {response.status_code}: {response.text}"
 
     def test_predict_response_has_score(
         self, test_client: TestClient, valid_payload: dict
     ):
         response = test_client.post("/predict", json=valid_payload)
         body = response.json()
-        assert "score" in body or "probability" in body or "prediction" in body, (
-            f"Predict response missing score field: {body}"
-        )
+        assert (
+            "score" in body or "probability" in body or "prediction" in body
+        ), f"Predict response missing score field: {body}"
 
     def test_predict_score_in_unit_interval(
         self, test_client: TestClient, valid_payload: dict
@@ -140,9 +143,7 @@ class TestPredictEndpoint:
         response = test_client.post("/predict", json=valid_payload)
         body = response.json()
         score = body.get("score") or body.get("probability") or body.get("prediction")
-        assert 0.0 <= float(score) <= 1.0, (
-            f"Prediction score {score} is outside [0, 1]"
-        )
+        assert 0.0 <= float(score) <= 1.0, f"Prediction score {score} is outside [0, 1]"
 
     def test_predict_missing_field_returns_422(
         self, test_client: TestClient, valid_payload: dict
@@ -150,9 +151,9 @@ class TestPredictEndpoint:
         """Omitting a required field must return HTTP 422 Unprocessable Entity."""
         incomplete = {k: v for k, v in valid_payload.items() if k != "loan_amnt"}
         response = test_client.post("/predict", json=incomplete)
-        assert response.status_code == 422, (
-            f"Expected 422 for missing field, got {response.status_code}"
-        )
+        assert (
+            response.status_code == 422
+        ), f"Expected 422 for missing field, got {response.status_code}"
 
     def test_predict_empty_body_returns_422(self, test_client: TestClient):
         """Sending an empty JSON body must return 422."""
@@ -181,14 +182,16 @@ class TestPredictEndpoint:
         bad_payload = {**valid_payload, "loan_amnt": -5000.0}
         response = test_client.post("/predict", json=bad_payload)
         # Pydantic validation or business logic should catch this
-        assert response.status_code in (400, 422), (
-            f"Negative loan_amnt should be rejected, got {response.status_code}"
-        )
+        assert response.status_code in (
+            400,
+            422,
+        ), f"Negative loan_amnt should be rejected, got {response.status_code}"
 
 
 # ---------------------------------------------------------------------------
 # Version endpoint
 # ---------------------------------------------------------------------------
+
 
 class TestVersionEndpoint:
     """Tests for the /version endpoint."""
@@ -200,6 +203,6 @@ class TestVersionEndpoint:
     def test_version_has_version_field(self, test_client: TestClient):
         response = test_client.get("/version")
         body = response.json()
-        assert "version" in body or "api_version" in body, (
-            f"Version response missing version field: {body}"
-        )
+        assert (
+            "version" in body or "api_version" in body
+        ), f"Version response missing version field: {body}"

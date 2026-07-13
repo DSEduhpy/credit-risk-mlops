@@ -1,13 +1,7 @@
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
 
-from src.config import (
-    FEATURES_PATH,
-    RANDOM_STATE,
-    TARGET_COLUMN,
-    TEST_SIZE,
-)
+from src.config import FEATURES_PATH, RANDOM_STATE, TARGET_COLUMN, TEST_SIZE
 
 
 def load_features() -> pd.DataFrame:
@@ -16,9 +10,7 @@ def load_features() -> pd.DataFrame:
     """
 
     if not FEATURES_PATH.exists():
-        raise FileNotFoundError(
-            f"Arquivo não encontrado: {FEATURES_PATH}"
-        )
+        raise FileNotFoundError(f"Arquivo não encontrado: {FEATURES_PATH}")
 
     return pd.read_parquet(FEATURES_PATH)
 
@@ -34,9 +26,13 @@ def split_data(
     """
 
     if TARGET_COLUMN not in data.columns:
-        raise ValueError(
-            f"Coluna alvo '{TARGET_COLUMN}' não encontrada"
-        )
+        print("\n" + "=" * 80)
+        print("TARGET_COLUMN:", TARGET_COLUMN)
+        print("COLUNAS:")
+        print(sorted(data.columns.tolist()))
+        print("=" * 80)
+
+        raise ValueError(f"Coluna alvo '{TARGET_COLUMN}' não encontrada")
 
     X = data.drop(columns=[TARGET_COLUMN])
     y = data[TARGET_COLUMN].astype(int)

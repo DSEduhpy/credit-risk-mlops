@@ -10,17 +10,17 @@ from typing import Dict, Optional
 
 import pandas as pd
 
-from src.config import PROJECT_ROOT
+from src.config import settings
 from src.logger import get_logger
 
-from .schema import validate_schema, detect_schema_drift
-from .quality import validate_data_quality
 from .expectations import validate_expectations
+from .quality import validate_data_quality
+from .schema import detect_schema_drift, validate_schema
 
 logger = get_logger(__name__)
 
 # Paths para relatórios
-REPORTS_PATH = PROJECT_ROOT.parent / "reports" / "quality"
+REPORTS_PATH = settings.paths.reports / "quality"
 
 
 def generate_validation_report(
@@ -43,17 +43,25 @@ def generate_validation_report(
     """
     report = {
         "validation_summary": {
-            "schema_validation": "passed" if all(
-                all(v.get("is_valid", True) for v in cat.values())
-                for cat in schema_results.values()
-                if isinstance(cat, dict)
-            ) else "failed",
+            "schema_validation": (
+                "passed"
+                if all(
+                    all(v.get("is_valid", True) for v in cat.values())
+                    for cat in schema_results.values()
+                    if isinstance(cat, dict)
+                )
+                else "failed"
+            ),
             "quality_validation": quality_results["quality_score"]["classification"],
-            "expectations_validation": "passed" if all(
-                all(v.get("is_valid", True) for v in cat.values())
-                for cat in expectations_results.values()
-                if isinstance(cat, dict)
-            ) else "warnings",
+            "expectations_validation": (
+                "passed"
+                if all(
+                    all(v.get("is_valid", True) for v in cat.values())
+                    for cat in expectations_results.values()
+                    if isinstance(cat, dict)
+                )
+                else "warnings"
+            ),
         },
         "details": {
             "schema": schema_results,
@@ -79,7 +87,7 @@ def save_validation_report(report: Dict) -> None:
 
     # Salvar JSON
     json_path = REPORTS_PATH / "quality_report.json"
-    with open(json_path, 'w', encoding='utf-8') as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False, default=str)
     logger.info(f"Relatório JSON salvo em {json_path}")
 
@@ -91,42 +99,45 @@ def save_validation_report(report: Dict) -> None:
 
     # Schema summary
     schema_status = report["validation_summary"]["schema_validation"]
-    csv_data.append({
-        "category": "schema",
-        "metric": "overall_status",
-        "value": schema_status,
-        "details": ""
-    })
+    csv_data.append(
+        {
+            "category": "schema",
+            "metric": "overall_status",
+            "value": schema_status,
+            "details": "",
+        }
+    )
 
     # Quality scores
     quality = report["details"]["quality"]["quality_score"]
     for key, value in quality.items():
-        csv_data.append({
-            "category": "quality",
-            "metric": key,
-            "value": value,
-            "details": ""
-        })
+        csv_data.append(
+            {"category": "quality", "metric": key, "value": value, "details": ""}
+        )
 
     # Expectations summary
     expectations_status = report["validation_summary"]["expectations_validation"]
-    csv_data.append({
-        "category": "expectations",
-        "metric": "overall_status",
-        "value": expectations_status,
-        "details": ""
-    })
+    csv_data.append(
+        {
+            "category": "expectations",
+            "metric": "overall_status",
+            "value": expectations_status,
+            "details": "",
+        }
+    )
 
     # Missing data summary
     missing = report["details"]["quality"]["missing_validation"]
     for col, stats in missing.items():
         if stats["severity"] != "ok":
-            csv_data.append({
-                "category": "missing",
-                "metric": f"{col}_missing_pct",
-                "value": stats["missing_percentage"],
-                "details": stats["severity"]
-            })
+            csv_data.append(
+                {
+                    "category": "missing",
+                    "metric": f"{col}_missing_pct",
+                    "value": stats["missing_percentage"],
+                    "details": stats["severity"],
+                }
+            )
 
     pd.DataFrame(csv_data).to_csv(csv_path, index=False)
     logger.info(f"Relatório CSV salvo em {csv_path}")
@@ -197,7 +208,9 @@ def main() -> None:
 
     if len(sys.argv) < 2:
         print("Uso: python src/validation/validator.py <data_path> [reference_path]")
-        print("Exemplo: python src/validation/validator.py data/features/features.parquet")
+        print(
+            "Exemplo: python src/validation/validator.py data/features/features.parquet"
+        )
         sys.exit(1)
 
     data_path = Path(sys.argv[1])
@@ -220,15 +233,23 @@ def main() -> None:
         print("\n===== RELATÓRIO DE VALIDAÇÃO =====")
         print(f"Schema: {report['validation_summary']['schema_validation'].upper()}")
         print(f"Quality: {report['validation_summary']['quality_validation'].upper()}")
-        print(f"Expectations: {report['validation_summary']['expectations_validation'].upper()}")
+        print(
+            f"Expectations: {report['validation_summary']['expectations_validation'].upper()}"
+        )
 
-        quality_score = report['details']['quality']['quality_score']
-        print(f"\nScore de Qualidade: {quality_score['final_score']:.1f}/100 ({quality_score['classification']})")
+        quality_score = report["details"]["quality"]["quality_score"]
+        print(
+            f"\nScore de Qualidade: {quality_score['final_score']:.1f}/100 ({quality_score['classification']})"
+        )
 
         if "schema_drift" in report:
             drift = report["schema_drift"]
-            if drift["added_columns"] or drift["removed_columns"] or drift["dtype_changes"]:
-                print(f"\nSchema Drift Detectado:")
+            if (
+                drift["added_columns"]
+                or drift["removed_columns"]
+                or drift["dtype_changes"]
+            ):
+                print("\nSchema Drift Detectado:")
                 if drift["added_columns"]:
                     print(f"  Colunas adicionadas: {drift['added_columns']}")
                 if drift["removed_columns"]:

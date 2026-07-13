@@ -16,19 +16,14 @@ from __future__ import annotations
 
 import os
 
-from src.config.base import (
-    APIConfig,
-    BaseConfig,
-    LoggingConfig,
-    MLflowConfig,
-    MonitoringConfig,
-)
+from src.config.base import (APIConfig, BaseConfig, LoggingConfig,
+                             MLflowConfig, MonitoringConfig)
 
 
 class _ProdLoggingConfig(LoggingConfig):
     level: str = "INFO"
-    json_format: bool = True    # Machine-parseable for log aggregation
-    log_to_file: bool = True    # Written to logs/pipeline.log
+    json_format: bool = True  # Machine-parseable for log aggregation
+    log_to_file: bool = True  # Written to logs/pipeline.log
     backup_count: int = 10
 
 

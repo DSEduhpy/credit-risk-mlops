@@ -8,10 +8,8 @@ what differs. Do NOT import environment-specific modules here.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Dict, List, Optional
-
 
 # ---------------------------------------------------------------------------
 # Project root — resolved from this file's location so it works regardless
@@ -30,7 +28,7 @@ class PathConfig:
     root: Path = PROJECT_ROOT
     data_raw: Path = PROJECT_ROOT / "data" / "raw"
     data_processed: Path = PROJECT_ROOT / "data" / "processed"
-    data_features: Path = PROJECT_ROOT / "data" / "features"
+    data_features: Path = PROJECT_ROOT / "data" / "features.parquet"
     models: Path = PROJECT_ROOT / "models"
     reports: Path = PROJECT_ROOT / "reports"
     reports_figures: Path = PROJECT_ROOT / "reports" / "figures"
@@ -43,7 +41,13 @@ class PathConfig:
     def ensure_dirs(cls) -> None:
         """Create all output directories if they do not already exist."""
         for attr, value in vars(cls).items():
-            if isinstance(value, Path) and attr != "root":
+            if not isinstance(value, Path) or attr == "root":
+                continue
+
+            # If the configured path points to a file, create its parent directory.
+            if value.suffix:
+                value.parent.mkdir(parents=True, exist_ok=True)
+            else:
                 value.mkdir(parents=True, exist_ok=True)
 
 
@@ -54,9 +58,10 @@ class PathConfig:
 class BusinessConfig:
     """Financial parameters for credit risk business logic."""
 
-    default_cost: int = 10_000        # Cost of approving a customer who defaults
+    default_cost: int = 10_000  # Cost of approving a customer who defaults
     revenue_per_approval: int = 1_000  # Revenue from a correctly approved customer
-    default_threshold: float = 0.5    # Starting probability threshold (tuned later)
+    # Starting probability threshold (tuned later)
+    default_threshold: float = 0.5
 
 
 # ---------------------------------------------------------------------------
@@ -120,7 +125,7 @@ class ValidationConfig:
     min_row_count: int = 100
 
     # Expected target column name
-    target_column: str = "default"
+    target_column: str = "TARGET"
 
     # Columns that must always be present after feature engineering
     required_feature_columns: List[str] = [

@@ -4,10 +4,11 @@ Validações de expectativas e regras de negócio.
 Implementa validações específicas do domínio de risco de crédito.
 """
 
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 
+from src.config import TARGET_COLUMN
 from src.logger import get_logger
 
 logger = get_logger(__name__)
@@ -44,10 +45,10 @@ def validate_business_rules(df: pd.DataFrame) -> Dict[str, Dict]:
         }
 
     # Regra 3: TARGET deve ser binário
-    if "TARGET" in df.columns:
-        invalid_target = df[~df["TARGET"].isin([0, 1])]["TARGET"].count()
+    if TARGET_COLUMN in df.columns:
+        invalid_target = df[~df[TARGET_COLUMN].isin([0, 1])][TARGET_COLUMN].count()
         results["target_binary"] = {
-            "description": "TARGET deve ser 0 ou 1",
+            "description": f"{TARGET_COLUMN} deve ser 0 ou 1",
             "violations": int(invalid_target),
             "is_valid": invalid_target == 0,
         }

@@ -56,7 +56,6 @@ from __future__ import annotations
 import json
 import logging
 import logging.handlers
-import os
 import sys
 import time
 import traceback
@@ -128,10 +127,27 @@ class _JSONFormatter(logging.Formatter):
 
         # Inject any extra fields the caller passed via extra={}
         _reserved = {
-            "name", "msg", "args", "levelname", "levelno", "pathname",
-            "filename", "module", "exc_info", "exc_text", "stack_info",
-            "lineno", "funcName", "created", "msecs", "relativeCreated",
-            "thread", "threadName", "processName", "process", "message",
+            "name",
+            "msg",
+            "args",
+            "levelname",
+            "levelno",
+            "pathname",
+            "filename",
+            "module",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "lineno",
+            "funcName",
+            "created",
+            "msecs",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "processName",
+            "process",
+            "message",
             "taskName",
         }
         for key, value in record.__dict__.items():
@@ -160,10 +176,10 @@ class _HumanFormatter(logging.Formatter):
     """
 
     _COLOURS = {
-        "DEBUG": "\033[36m",     # Cyan
-        "INFO": "\033[32m",      # Green
-        "WARNING": "\033[33m",   # Yellow
-        "ERROR": "\033[31m",     # Red
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
         "CRITICAL": "\033[35m",  # Magenta
     }
     _RESET = "\033[0m"
@@ -203,6 +219,7 @@ def _configure_root_logger() -> None:
     # Lazy import to avoid circular dependency: logger <- config <- logger
     try:
         from src.config import settings
+
         use_json = settings.logging.json_format
         level = getattr(logging, settings.logging.level.upper(), logging.INFO)
         log_to_file = settings.logging.log_to_file
@@ -229,9 +246,7 @@ def _configure_root_logger() -> None:
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(level)
-    formatter: logging.Formatter = (
-        _JSONFormatter() if use_json else _HumanFormatter()
-    )
+    formatter: logging.Formatter = _JSONFormatter() if use_json else _HumanFormatter()
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
 

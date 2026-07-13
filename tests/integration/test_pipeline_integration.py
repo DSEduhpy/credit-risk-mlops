@@ -21,6 +21,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from src.config import TARGET_COLUMN
+
 pytestmark = pytest.mark.integration
 
 
@@ -30,18 +32,16 @@ class TestCleaningToFeatureEngineering:
     def test_clean_then_engineer_produces_required_features(
         self, raw_dataframe: pd.DataFrame
     ):
+        from src.config import settings
         from src.processing.cleaning import clean_data
         from src.processing.feature_engineering import engineer_features
-        from src.config import settings
 
         cleaned = clean_data(raw_dataframe.copy())
         features = engineer_features(cleaned)
 
         required = settings.validation.required_feature_columns
         missing = [c for c in required if c not in features.columns]
-        assert not missing, (
-            f"After clean→engineer, missing required columns: {missing}"
-        )
+        assert not missing, f"After clean→engineer, missing required columns: {missing}"
 
     def test_pipeline_output_has_no_inf_values(self, raw_dataframe: pd.DataFrame):
         from src.processing.cleaning import clean_data
@@ -61,11 +61,12 @@ class TestCleaningToFeatureEngineering:
         cleaned = clean_data(raw_dataframe.copy())
         features = engineer_features(cleaned)
 
-        if "default" in features.columns:
-            unique_vals = set(features["default"].dropna().unique())
-            assert unique_vals <= {0, 1}, (
-                f"Target column contains non-binary values: {unique_vals}"
-            )
+        if TARGET_COLUMN in features.columns:
+            unique_vals = set(features[TARGET_COLUMN].dropna().unique())
+            assert unique_vals <= {
+                0,
+                1,
+            }, f"Target column contains non-binary values: {unique_vals}"
 
 
 class TestFeatureEngineeringToSplit:
@@ -74,32 +75,32 @@ class TestFeatureEngineeringToSplit:
     def test_split_after_engineering_preserves_all_rows(
         self, raw_dataframe: pd.DataFrame
     ):
+        from src.modeling.data import split_data
         from src.processing.cleaning import clean_data
         from src.processing.feature_engineering import engineer_features
-        from src.modeling.data import split_data
 
         cleaned = clean_data(raw_dataframe.copy())
         features = engineer_features(cleaned)
         X_train, X_test, y_train, y_test = split_data(features)
 
         total_after_split = len(X_train) + len(X_test)
-        assert total_after_split == len(features), (
-            f"Rows lost during split: {len(features)} → {total_after_split}"
-        )
+        assert total_after_split == len(
+            features
+        ), f"Rows lost during split: {len(features)} → {total_after_split}"
 
     def test_split_target_distribution_close_to_original(
         self, raw_dataframe: pd.DataFrame
     ):
+        from src.modeling.data import split_data
         from src.processing.cleaning import clean_data
         from src.processing.feature_engineering import engineer_features
-        from src.modeling.data import split_data
 
         cleaned = clean_data(raw_dataframe.copy())
         features = engineer_features(cleaned)
         X_train, X_test, y_train, y_test = split_data(features, stratify=True)
 
-        if "default" in features.columns:
-            original_rate = features["default"].mean()
+        if TARGET_COLUMN in features.columns:
+            original_rate = features[TARGET_COLUMN].mean()
             train_rate = y_train.mean()
             assert abs(train_rate - original_rate) <= 0.15, (
                 f"Stratification failed: original={original_rate:.2f}, "
@@ -117,10 +118,10 @@ class TestMetricsConsistency:
         A model that assigns high scores to defaults should produce
         both high AUC and positive profit (relative to random baseline).
         """
-        from src.evaluation.metrics import compute_metrics
         from src.evaluation.business_metrics import compute_business_profit
+        from src.evaluation.metrics import compute_metrics
 
-        y_true = feature_dataframe["default"].values
+        y_true = feature_dataframe[TARGET_COLUMN].values
         # Near-perfect predictions
         rng = np.random.default_rng(42)
         y_prob_good = np.where(
@@ -137,19 +138,19 @@ class TestMetricsConsistency:
         profit_good = compute_business_profit(y_true, y_prob_good, threshold=0.5)
         profit_random = compute_business_profit(y_true, y_prob_random, threshold=0.5)
 
-        assert metrics_good["auc"] > metrics_random["auc"], (
-            "Near-perfect model must have higher AUC than random"
-        )
-        assert profit_good >= profit_random - 100, (
-            "Near-perfect model must not have substantially lower profit than random"
-        )
+        assert (
+            metrics_good["auc"] > metrics_random["auc"]
+        ), "Near-perfect model must have higher AUC than random"
+        assert (
+            profit_good >= profit_random - 100
+        ), "Near-perfect model must not have substantially lower profit than random"
 
 
 class TestLoggerIntegration:
     """Integration: logger produces structured output without breaking pipeline."""
 
     def test_pipeline_logger_does_not_raise(self):
-        from src.logger import pipeline_logger, StageTimer
+        from src.logger import StageTimer, pipeline_logger
 
         log = pipeline_logger("test_stage")
         log.info("Integration test message")

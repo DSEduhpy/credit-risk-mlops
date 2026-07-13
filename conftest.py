@@ -16,12 +16,20 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from src.config import TARGET_COLUMN
 
 # ---------------------------------------------------------------------------
 # CRITICAL: set the environment BEFORE any src import so config resolves
 # to TestConfig throughout the entire test session.
 # ---------------------------------------------------------------------------
-os.environ.setdefault("CREDIT_RISK_ENV", "test")
+os.environ["CREDIT_RISK_ENV"] = "test"
+
 
 # ---------------------------------------------------------------------------
 # Ensure the project root is importable regardless of how pytest is invoked.
@@ -33,15 +41,12 @@ if str(_PROJECT_ROOT) not in sys.path:
 # ---------------------------------------------------------------------------
 # Standard library / third-party imports (after path is set)
 # ---------------------------------------------------------------------------
-import numpy as np
-import pandas as pd
-import pytest
-from unittest.mock import MagicMock, patch
 
 
 # ---------------------------------------------------------------------------
 # Synthetic dataset factories
 # ---------------------------------------------------------------------------
+
 
 def _make_raw_dataframe(n_rows: int = 200, seed: int = 42) -> pd.DataFrame:
     """
@@ -65,9 +70,7 @@ def _make_raw_dataframe(n_rows: int = 200, seed: int = 42) -> pd.DataFrame:
                 ["< 1 year", "1 year", "2 years", "5 years", "10+ years", None],
                 size=n,
             ),
-            "home_ownership": rng.choice(
-                ["RENT", "OWN", "MORTGAGE", "OTHER"], size=n
-            ),
+            "home_ownership": rng.choice(["RENT", "OWN", "MORTGAGE", "OTHER"], size=n),
             "annual_inc": rng.uniform(20_000, 200_000, size=n),
             "verification_status": rng.choice(
                 ["Verified", "Source Verified", "Not Verified"], size=n
@@ -135,7 +138,7 @@ def _make_feature_dataframe(n_rows: int = 200, seed: int = 42) -> pd.DataFrame:
             "purpose_encoded": rng.integers(0, 5, size=n).astype(float),
             "loan_amnt_to_income": rng.uniform(0.01, 2.0, size=n),
             "fico_avg": rng.uniform(600.0, 785.0, size=n),
-            "default": rng.choice([0, 1], size=n, p=[0.80, 0.20]),
+            TARGET_COLUMN: rng.choice([0, 1], size=n, p=[0.80, 0.20]),
         }
     )
     return df
@@ -144,6 +147,7 @@ def _make_feature_dataframe(n_rows: int = 200, seed: int = 42) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # Pytest fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="session")
 def raw_dataframe() -> pd.DataFrame:
@@ -176,14 +180,14 @@ def feature_matrix(small_feature_dataframe: pd.DataFrame):
     Function-scoped so each test gets a fresh copy.
     """
     df = small_feature_dataframe.copy()
-    y = df.pop("default")
+    y = df.pop(TARGET_COLUMN)
     return df, y
 
 
 @pytest.fixture(scope="session")
 def feature_columns(feature_dataframe: pd.DataFrame) -> list:
     """List of feature column names (excludes target)."""
-    return [c for c in feature_dataframe.columns if c != "default"]
+    return [c for c in feature_dataframe.columns if c != TARGET_COLUMN]
 
 
 @pytest.fixture
@@ -194,12 +198,14 @@ def mock_trained_model():
     """
     model = MagicMock()
     model.predict_proba.side_effect = lambda X: np.column_stack(
-        [1 - np.random.default_rng(42).uniform(0.1, 0.9, len(X)),
-         np.random.default_rng(42).uniform(0.1, 0.9, len(X))]
+        [
+            1 - np.random.default_rng(42).uniform(0.1, 0.9, len(X)),
+            np.random.default_rng(42).uniform(0.1, 0.9, len(X)),
+        ]
     )
-    model.predict.side_effect = lambda X: (
-        model.predict_proba(X)[:, 1] > 0.5
-    ).astype(int)
+    model.predict.side_effect = lambda X: (model.predict_proba(X)[:, 1] > 0.5).astype(
+        int
+    )
     model.classes_ = np.array([0, 1])
     return model
 
@@ -227,12 +233,11 @@ def patched_mlflow():
     Patch MLflow tracking so tests never write to mlruns/.
     Yields a MagicMock representing the mlflow module.
     """
-    with patch("mlflow.start_run"), \
-         patch("mlflow.log_metric"), \
-         patch("mlflow.log_param"), \
-         patch("mlflow.log_artifact"), \
-         patch("mlflow.set_experiment"), \
-         patch("mlflow.sklearn.log_model"):
+    with patch("mlflow.start_run"), patch("mlflow.log_metric"), patch(
+        "mlflow.log_param"
+    ), patch("mlflow.log_artifact"), patch("mlflow.set_experiment"), patch(
+        "mlflow.sklearn.log_model"
+    ):
         yield
 
 
@@ -243,6 +248,7 @@ def _reset_correlation_id():
     state leaking from one test to the next.
     """
     from src.logger import set_correlation_id
+
     set_correlation_id("test-run")
     yield
     set_correlation_id("no-correlation-id")

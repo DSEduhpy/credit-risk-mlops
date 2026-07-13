@@ -1,327 +1,198 @@
-# 💳 Credit Risk MLOps Pipeline
+# Credit Risk MLOps Pipeline
 
-Pipeline completo de Machine Learning para análise e gerenciamento de risco de crédito, desenvolvido com foco em boas práticas de Engenharia de Dados, Ciência de Dados, MLOps e Engenharia de Software.
+## Overview
 
----
+This project addresses the critical problem of automated credit decision-making for consumer portfolios. The solution supports large-scale credit risk assessment, focusing on maximizing financial returns and minimizing operational losses.
 
-## 🎯 Objetivo
+Instead of optimizing generic classification metrics, the model is calibrated for real business impact:
+- Cost of default per client: `10000`
+- Recoverable revenue per approved client: `1000`
 
-Este projeto implementa um pipeline end-to-end para previsão de inadimplência em operações de crédito.
+The estimated project result is an incremental financial gain of approximately `+23 million`, maintaining a technical balance between AUC, precision, and recall.
 
-O sistema permite:
+## Business Problem
 
-* Ingestão e validação de dados
-* Processamento e limpeza
-* Engenharia de atributos
-* Treinamento de modelos de Machine Learning
-* Avaliação técnica e financeira
-* Versionamento de dados e modelos
-* Monitoramento de qualidade
-* Disponibilização via API REST
+Credit risk assessment involves balancing two key financial metrics:
+- **Default cost**: High cost when approving bad payers (false negatives)
+- **Revenue opportunity**: Lost profit when rejecting good payers (false positives)
 
-O foco principal é gerar valor de negócio através da redução de perdas financeiras causadas por inadimplência.
+The goal is to maximize net financial return by optimizing the decision threshold based on actual business costs, not statistical metrics.
 
----
+## Architecture
 
-# 🏗️ Arquitetura
+The system follows a modular architecture with clear separation of concerns:
 
-```text
-Raw Data
-    │
-    ▼
-┌───────────────┐
-│   Ingestion   │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ Validation    │
-│ Schema Check  │
-│ Data Quality  │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ Processing    │
-│ Cleaning      │
-│ Missing Values│
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ Feature Eng.  │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ Modeling      │
-│ MLflow        │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ Evaluation    │
-│ Business KPI  │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ FastAPI       │
-│ Inference API │
-└───────────────┘
+- **ingestion**: Captures and consolidates source data into parquet format
+- **processing**: Data cleaning, missing value handling, and preprocessing
+- **feature_engineering**: Categorical transformation and feature generation
+- **modeling**: Training with experiment tracking, artifact production, and threshold optimization
+- **api**: FastAPI serving layer for real-time inference
+- **monitoring**: Drift detection and data quality monitoring
+- **explainability**: SHAP-based model explanations
+
+The pipeline is orchestrated by DVC, ensuring reproducibility of data, logic, and artifacts.
+
 ```
-
----
-
-# 📂 Estrutura do Projeto
-
-```text
 credit-risk-mlops/
-│
 ├── data/
 │   ├── raw/
 │   ├── processed/
 │   └── features/
-│
+├── docs/
 ├── models/
-│
 ├── reports/
-│
 ├── src/
 │   ├── ingestion/
 │   ├── processing/
-│   ├── validation/
 │   ├── modeling/
 │   ├── evaluation/
 │   ├── api/
 │   ├── monitoring/
 │   └── explainability/
-│
 ├── tests/
-│
-├── .github/
-│   └── workflows/
-│
+├── .github/workflows/
 ├── dvc.yaml
-├── requirements.txt
 ├── Dockerfile
+├── requirements.txt
 ├── README.md
 └── tasklist.md
 ```
 
----
+## Tech Stack
 
-# 🛠️ Tecnologias
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Language | Python 3.x | Core development |
+| Data Processing | Pandas, PyArrow | Data manipulation and columnar storage |
+| Machine Learning | Scikit-learn, XGBoost, LightGBM, CatBoost | Modeling and algorithms |
+| Experiment Tracking | MLflow | Model versioning and metrics |
+| Data Versioning | DVC | Pipeline orchestration and data versioning |
+| API | FastAPI | Real-time inference serving |
+| Explainability | SHAP | Model interpretability |
+| Containerization | Docker | Environment portability |
+| Visualization | Matplotlib | Charts and plots |
 
-## Linguagem
+## Pipeline
 
-* Python 3.12+
+### Data Pipeline
+- **ingest**: Validates CSV source and creates `data/raw/data.parquet`
+- **processing**: Cleans data, handles missing values, applies transformations
+- **features**: Generates model-ready features with one-hot encoding
 
-## Manipulação de Dados
+### Training Pipeline
+- **train**: Trains multi-model benchmark with MLflow tracking
 
-* Pandas
-* NumPy
-* PyArrow
+## Modeling
 
-## Machine Learning
+The project implements a multi-model benchmark for binary classification:
 
-* Scikit-Learn
-* XGBoost
-* LightGBM
-* CatBoost
+- **Logistic Regression**: Baseline linear model
+- **XGBoost**: Gradient boosting with tree-based optimization
+- **LightGBM**: Microsoft gradient boosting framework
+- **CatBoost**: Yandex categorical feature handling
 
-## MLOps
+All models are trained with:
+- Stratified train/test splits to handle class imbalance
+- Class weighting to mitigate bias
+- Comprehensive metric logging (AUC, precision, recall, financial impact)
 
-* MLflow
-* DVC
+## Business Optimization
+
+### Threshold Calibration
+Instead of using default 0.5 threshold, the system optimizes based on business costs:
+- Default cost: 10,000 per bad approval
+- Revenue: 1,000 per good approval
+
+The optimal threshold maximizes net profit by finding the right balance between precision (avoiding bad approvals) and recall (capturing defaults).
+
+## Results
+
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| AUC | ~0.748 | Good separation between good/bad payers |
+| Precision | ~0.17 | Accuracy of positive predictions in imbalanced context |
+| Recall | ~0.64 | Ability to capture actual defaulters |
+| Financial Impact | +23M | Estimated incremental profit |
+
+## MLflow Tracking
+
+Experiments are tracked with:
+- Model parameters and hyperparameters
+- Performance metrics (AUC, precision, recall)
+- Business metrics (profit, loss)
+- Model artifacts and versions
+
+Access tracking UI with: `mlflow ui --backend-store-uri ./mlruns`
 
 ## API
 
-* FastAPI
-* Uvicorn
-* Pydantic
-
-## Qualidade
-
-* Pytest
-* Ruff
-
-## Infraestrutura
-
-* Docker
-* GitHub Actions
-
----
-
-# 📊 Funcionalidades Implementadas
-
-## Engenharia de Dados
-
-* Ingestão de dados
-* Conversão para Parquet
-* Pipeline reprodutível
-* Validação de schema
-
-## Qualidade de Dados
-
-* Verificação de colunas obrigatórias
-* Validação de tipos
-* Controle de dados faltantes
-* Detecção de drift de schema
-
-## Ciência de Dados
-
-* Feature Engineering
-* Seleção de atributos
-* Treinamento de modelos
-* Avaliação de desempenho
-
-## Métricas de Negócio
-
-* Receita estimada
-* Custo de inadimplência
-* Otimização baseada em lucro
-
-## MLOps
-
-* Rastreamento de experimentos
-* Versionamento de datasets
-* Versionamento de modelos
-* Testes automatizados
-
----
-
-# 🧪 Testes
-
-Executar todos os testes:
+FastAPI-based inference service with endpoint:
 
 ```bash
-pytest tests -v
+POST /predict
+Content-Type: application/json
+
+{
+  "features": {
+    "AMT_INCOME_TOTAL": 202500.0,
+    "DAYS_BIRTH": -12012,
+    "CODE_GENDER": "F"
+  }
+}
 ```
 
-Executar testes específicos:
+## Explainability
 
+SHAP-based explanations for model interpretability. See [docs/explainability.md](docs/explainability.md) for details.
+
+## Monitoring
+
+Drift detection monitors:
+- Feature distribution changes
+- Prediction distribution shifts
+- Data quality metrics
+
+## Run Locally
+
+### Prerequisites
+- Python 3.8+
+- Git
+
+### Setup
 ```bash
-pytest tests/validation -v
-```
-
-Com cobertura:
-
-```bash
-pytest --cov=src
-```
-
----
-
-# 🚀 Como Executar
-
-## 1. Clonar repositório
-
-```bash
-git clone https://github.com/seu-usuario/credit-risk-mlops.git
-
+# Clone repository
+git clone <repository-url>
 cd credit-risk-mlops
-```
 
-## 2. Criar ambiente virtual
-
-```bash
-python -m venv .venv
-```
-
-Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-Linux/Mac:
-
-```bash
-source .venv/bin/activate
-```
-
-## 3. Instalar dependências
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-## 4. Executar pipeline
+# Configure environment
+cp .env.example .env
 
-```bash
+# Run DVC pipeline
 dvc repro
+
+# Start MLflow UI
+mlflow ui --backend-store-uri ./mlruns
+
+# Start API server
+uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+
+# Test inference
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"features": {"AMT_INCOME_TOTAL": 202500.0, "DAYS_BIRTH": -12012, "CODE_GENDER": "F"}}'
 ```
 
----
+## Roadmap
 
-# 📈 MLflow
-
-Iniciar interface:
-
-```bash
-mlflow ui
-```
-
-Acessar:
-
-```text
-http://localhost:5000
-```
-
----
-
-# 🌐 API
-
-Executar:
-
-```bash
-uvicorn src.api.app:app --reload
-```
-
-Documentação:
-
-```text
-http://localhost:8000/docs
-```
-
----
-
-# 🔄 CI/CD
-
-O projeto utiliza GitHub Actions para:
-
-* Execução automática de testes
-* Validação de código
-* Verificação de qualidade
-
----
-
-# 📌 Roadmap
-
-* [x] Ingestão de dados
-* [x] Processamento
-* [x] Feature Engineering
-* [x] Validação de Schema
-* [x] Validação de Qualidade
-* [x] Testes Automatizados
-* [x] Métricas de Negócio
-* [ ] Treinamento Final dos Modelos
-* [ ] API Completa de Inferência
-* [ ] Monitoramento de Produção
-* [ ] Explainability com SHAP
-* [ ] Deploy em Cloud
-
----
-
-# 👨‍💻 Autor
-
-Eduardo
-
-Projeto desenvolvido para demonstrar competências em:
-
-* Engenharia de Dados
-* Ciência de Dados
-* Machine Learning
-* MLOps
-* Engenharia de Software
+- [x] Multi-model benchmark (Logistic, XGBoost, LightGBM, CatBoost)
+- [x] SHAP explainability implementation
+- [x] Business-oriented threshold optimization
+- [ ] GitHub Actions CI/CD pipeline
+- [ ] Cloud deployment (AWS/GCP) with containers
+- [ ] Advanced monitoring and alerting
+- [ ] Automated testing suite
+- [ ] Feature store implementation
+- [ ] Model A/B testing framework
