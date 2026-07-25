@@ -1,120 +1,62 @@
-name: CI Pipeline
+name: Credit Risk CI
 
 on:
+
   push:
+
     branches:
       - main
+      - master
 
   pull_request:
+
     branches:
       - main
+      - master
 
 jobs:
 
-  credit-risk-pipeline:
+  tests:
 
     runs-on: ubuntu-latest
 
     steps:
 
-      # ==========================================================
-      # Checkout do repositório
-      # ==========================================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ==========================================================
-      # Setup Python
-      # ==========================================================
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
 
-      # ==========================================================
-      # Cache de dependências
-      # ==========================================================
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: "3.14"
 
-      # ==========================================================
-      # Instalar dependências
-      # ==========================================================
-      - name: Install dependencies
+      - name: Upgrade pip
+
         run: |
           python -m pip install --upgrade pip
+
+      - name: Install dependencies
+
+        run: |
           pip install -r requirements.txt
 
-      # ==========================================================
-      # Instalar DVC
-      # ==========================================================
-      - name: Install DVC
+      - name: Ruff
+
         run: |
-          pip install dvc
+          ruff check .
 
-      # ==========================================================
-      # Validar estrutura do projeto
-      # ==========================================================
-      - name: Validate imports
+      - name: Black
+
         run: |
-          python -m src.ingestion.load_data --help || true
-          python -m src.processing.cleaning --help || true
-          python -m src.processing.feature_engineering --help || true
+          black --check .
 
-      # ==========================================================
-      # Executar pipeline DVC
-      # ==========================================================
-      - name: Run DVC pipeline
+      - name: isort
+
         run: |
-          dvc repro
+          isort --check-only .
 
-      # ==========================================================
-      # Rodar treinamento benchmark
-      # ==========================================================
-      - name: Run training pipeline
+      - name: Pytest
+
         run: |
-          python -m src.modeling.train
-
-      # ==========================================================
-      # Rodar explainability SHAP
-      # ==========================================================
-      - name: Run SHAP explainability
-        run: |
-          python -m src.explainability.explain
-
-      # ==========================================================
-      # Rodar monitoramento de drift
-      # ==========================================================
-      - name: Run drift monitoring
-        run: |
-          python -m src.monitoring.drift
-
-      # ==========================================================
-      # Rodar validação de qualidade
-      # ==========================================================
-      - name: Run data validation
-        run: |
-          python -m src.validation.validator
-
-      # ==========================================================
-      # Upload de artefatos
-      # ==========================================================
-      - name: Upload reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: reports/
-
-      # ==========================================================
-      # Upload modelos
-      # ==========================================================
-      - name: Upload trained models
-        uses: actions/upload-artifact@v4
-        with:
-          name: trained-models
-          path: models/
+          pytest
