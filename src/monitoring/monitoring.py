@@ -30,7 +30,8 @@ class ModelMonitor:
     """Orquestra coleta, persistência e alerta de degradação de modelo."""
 
     def __init__(self, history_path: str | Path | None = None) -> None:
-        self.history_path = Path(history_path or "reports/monitoring_history.json")
+        self.history_path = Path(
+            history_path or "reports/monitoring_history.json")
         self.history_path.parent.mkdir(parents=True, exist_ok=True)
         self._history: list[MonitoringSnapshot] = self._load_history()
 
@@ -50,7 +51,8 @@ class ModelMonitor:
     def _save_history(self) -> None:
         """Persiste o histórico de snapshots em disco."""
         with self.history_path.open("w", encoding="utf-8") as handle:
-            json.dump([asdict(item) for item in self._history], handle, indent=2)
+            json.dump([asdict(item)
+                      for item in self._history], handle, indent=2)
 
     def record_snapshot(
         self,
@@ -71,7 +73,8 @@ class ModelMonitor:
         )
         self._history.append(snapshot)
         self._save_history()
-        logger.info("Snapshot de monitoramento registrado", extra=asdict(snapshot))
+        logger.info("Snapshot de monitoramento registrado",
+                    extra=asdict(snapshot))
         return snapshot
 
     def get_history(self) -> list[MonitoringSnapshot]:

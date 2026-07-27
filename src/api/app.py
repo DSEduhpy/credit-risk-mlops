@@ -64,7 +64,8 @@ def metrics_endpoint() -> str:
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(request: PredictRequest, request_obj: Request) -> PredictResponse:
-    correlation_id = request_obj.headers.get("x-request-id") or set_correlation_id()
+    correlation_id = request_obj.headers.get(
+        "x-request-id") or set_correlation_id()
     request_obj.state.correlation_id = correlation_id
 
     try:
@@ -72,7 +73,8 @@ def predict(request: PredictRequest, request_obj: Request) -> PredictResponse:
             model_service.load_model()
 
         features = pd.DataFrame([request.model_dump()])
-        probability = float(model_service.model.predict_proba(features)[:, 1][0])
+        probability = float(
+            model_service.model.predict_proba(features)[:, 1][0])
         prediction = int(model_service.model.predict(features)[0])
 
         log_inference(
@@ -83,7 +85,8 @@ def predict(request: PredictRequest, request_obj: Request) -> PredictResponse:
             features=request.model_dump(),
             threshold=0.5,
         )
-        metrics.record_inference(probability=probability, prediction=prediction)
+        metrics.record_inference(
+            probability=probability, prediction=prediction)
 
         return PredictResponse(
             prediction=prediction,

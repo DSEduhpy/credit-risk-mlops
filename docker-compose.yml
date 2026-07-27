@@ -1,58 +1,73 @@
+# Docker Compose profissional para API FastAPI.
+# Nesta etapa mantemos apenas a API.
+# O serviço do MLflow será adicionado na fase de infraestrutura
+# (Model Registry + Deploy + AWS + Observabilidade).
+
 services:
   api:
     image: credit-risk-mlops:latest
     build:
       context: .
       dockerfile: Dockerfile
+
     container_name: credit-risk-api
-    restart: unless-stopped
+
     environment:
       - CREDIT_RISK_ENV=prod
       - PORT=8000
       - API_WORKERS=2
+
+      # Será utilizado quando o MLflow Server for implantado
+      # - MLFLOW_TRACKING_URI=http://mlflow:5000
+
     ports:
       - "8000:8000"
-    volumes:
-      - api-models:/app/models
-      - api-mlruns:/app/mlruns
-      - api-logs:/app/logs
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
+
+    # Será habilitado quando o serviço MLflow existir
+    # depends_on:
+    #   - mlflow
+
     networks:
       - credit-risk-net
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: credit-risk-prometheus
-    restart: unless-stopped
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - credit-risk-net
+# ======================================================
+# ETAPA FUTURA
+#
+# O MLflow Server será utilizado quando implementarmos:
+#
+# - Model Registry
+# - Deploy na AWS
+# - Versionamento de Modelos
+# - Monitoramento
+#
+# ======================================================
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: credit-risk-grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    networks:
-      - credit-risk-net
+# mlflow:
+#   image: mlflow/mlflow:3.x
+#   container_name: credit-risk-mlflow
+#   command: >
+#     mlflow server
+#     --backend-store-uri sqlite:////mlflow/mlflow.db
+#     --default-artifact-root /mlruns
+#     --host 0.0.0.0
+#     --port 5000
+#
+#   ports:
+#     - "5000:5000"
+#
+#   volumes:
+#     - mlflow-artifacts:/mlruns
+#     - mlflow-db:/mlflow
+#
+#   networks:
+#     - credit-risk-net
 
 networks:
   credit-risk-net:
     driver: bridge
 
-volumes:
-  api-models:
-  api-mlruns:
-  api-logs:
+# Estes volumes serão utilizados quando o MLflow for habilitado.
+
+# volumes:
+#   mlflow-artifacts:
+#   mlflow-db:

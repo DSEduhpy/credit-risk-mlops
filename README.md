@@ -1,735 +1,348 @@
-<div align="center">
+<p align="center">
+<img src="assets/banner.png">
+</p>
 
-# 💳 Credit Risk MLOps Pipeline
+# 💳 Credit Risk MLOps
 
-### Plataforma completa de Machine Learning para análise de risco de crédito, com foco em impacto financeiro, qualidade de software, observabilidade, automação e ciclo de vida de modelos.
+<p align="center">
 
-<br>
+![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Production-009688?logo=fastapi)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)
+![MLflow](https://img.shields.io/badge/MLflow-Experiment%20Tracking-0194E2)
+![Pytest](https://img.shields.io/badge/Tests-144%20Passed-success)
+![Ruff](https://img.shields.io/badge/Ruff-Linting-black)
+![Black](https://img.shields.io/badge/Black-Code%20Style-black)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?logo=githubactions)
+![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?logo=prometheus)
+![Grafana](https://img.shields.io/badge/Grafana-Dashboard-F46800?logo=grafana)
 
-![Python](https://img.shields.io/badge/Python-3.14-blue?style=for-the-badge&logo=python)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange?style=for-the-badge&logo=scikitlearn)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?style=for-the-badge&logo=fastapi)
-![MLflow](https://img.shields.io/badge/MLflow-Experiments-0194E2?style=for-the-badge)
-![DVC](https://img.shields.io/badge/DVC-Data%20Versioning-945DD6?style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-Containers-2496ED?style=for-the-badge&logo=docker)
-![Pytest](https://img.shields.io/badge/Tests-140%20Passed-success?style=for-the-badge&logo=pytest)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
-
-<br>
-
-![GitHub Actions](https://github.com/DSEduhpy/credit-risk-mlops/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/Coverage-aguardando%20CI-lightgrey?style=for-the-badge)
-![GitHub stars](https://img.shields.io/github/stars/DSEduhpy/credit-risk-mlops?style=social)
-![GitHub forks](https://img.shields.io/github/forks/DSEduhpy/credit-risk-mlops?style=social)
-
-</div>
+</p>
 
 ---
 
-# 🚀 Sobre o Projeto
+# 📖 Sobre o Projeto
 
-Este projeto representa a construção de uma **plataforma completa de Machine Learning voltada para análise de risco de crédito**, desenvolvida seguindo princípios modernos de:
+O **Credit Risk MLOps** é um projeto **End-to-End de Machine Learning e MLOps** desenvolvido para simular um ambiente de produção utilizado por empresas que trabalham com concessão de crédito.
 
-- Engenharia de Dados
-- Ciência de Dados
-- Machine Learning
-- MLOps
-- Engenharia de Software
-- APIs
-- Testes Automatizados
-- Observabilidade
+O objetivo é demonstrar todas as etapas do ciclo de vida de um modelo de Machine Learning, desde a ingestão e preparação dos dados até o monitoramento em produção, seguindo boas práticas de Engenharia de Software, Engenharia de Dados e MLOps.
+
+O projeto foi desenvolvido com foco em:
+
+- Arquitetura limpa e modular
+- Código escalável
 - Reprodutibilidade
-
-Ao invés de simplesmente treinar um modelo de Machine Learning, este projeto demonstra **como um modelo é desenvolvido, validado, versionado, disponibilizado em produção, monitorado e mantido ao longo de todo seu ciclo de vida.**
-
-Em outras palavras:
-
-> **Não é apenas um modelo. É uma plataforma completa de Inteligência Artificial pronta para produção.**
+- Versionamento de modelos
+- Deploy containerizado
+- Observabilidade
+- Boas práticas de produção
 
 ---
 
-# 🎯 Objetivo
+# 🚀 Principais Recursos
 
-O objetivo é desenvolver um sistema capaz de auxiliar instituições financeiras durante o processo de concessão de crédito.
+✅ Pipeline completo de Machine Learning
 
-Cada cliente possui características financeiras.
+✅ Engenharia de Features
 
-O modelo analisa essas características e estima:
+✅ Benchmark entre múltiplos modelos
 
-> **Qual é a probabilidade daquele cliente se tornar inadimplente?**
+✅ Otimização automática de Threshold
 
-A partir dessa probabilidade, o sistema auxilia na tomada de decisão:
+✅ Avaliação técnica e financeira
 
-✅ Aprovar
+✅ MLflow Tracking
 
-ou
+✅ Model Registry (Champion / Challenger)
 
-❌ Rejeitar
+✅ API REST com FastAPI
 
-uma solicitação de crédito.
+✅ Docker & Docker Compose
 
----
+✅ Monitoramento com Prometheus
 
-# 💰 O diferencial
+✅ Estrutura preparada para Grafana
 
-A maioria dos projetos de Machine Learning busca melhorar métricas como:
+✅ GitHub Actions (CI/CD)
 
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-
-Embora importantes, essas métricas **não representam dinheiro.**
-
-Neste projeto o foco principal é outro:
-
-> **Maximizar lucro financeiro.**
-
-Isso significa que toda decisão do modelo considera o impacto econômico para a empresa.
-
-Por exemplo:
-
-| Situação | Impacto Financeiro |
-|------------|------------------:|
-| Aprovar um bom cliente | + R$ 1.000 |
-| Aprovar um cliente inadimplente | - R$ 10.000 |
-
-Perceba que um único erro pode custar dez vezes mais que um acerto gera de lucro.
-
-Por isso o projeto utiliza uma estratégia chamada:
-
-## Business Driven Machine Learning
-
-ou seja,
-
-> O modelo aprende pensando no negócio, e não apenas em métricas estatísticas.
+✅ Código validado com Ruff + Black + Pytest
 
 ---
 
-# 📈 Resultado Obtido
+# 📊 Visão Geral
 
-Após diversos experimentos e otimizações, o pipeline atingiu aproximadamente:
+Este projeto simula uma arquitetura utilizada por equipes de Ciência de Dados e Engenharia de Machine Learning em ambientes corporativos.
 
-| Métrica | Resultado |
-|---------|----------:|
-| AUC ROC | ~0.75 |
-| Recall | ~64% |
-| Precision | ~17% |
-| Pipeline Automatizado | ✅ |
+O pipeline contempla:
+
+```text
+Dados
+      │
+      ▼
+Ingestão
+      │
+      ▼
+Validação
+      │
+      ▼
+Processamento
+      │
+      ▼
+Feature Engineering
+      │
+      ▼
+Treinamento
+      │
+      ▼
+Benchmark
+      │
+      ▼
+MLflow
+      │
+      ▼
+Model Registry
+      │
+      ▼
+API FastAPI
+      │
+      ▼
+Docker
+      │
+      ▼
+Monitoramento
+```
+
+---
+
+# 🏆 Resultados do Projeto
+
+| Item | Resultado |
+|------|-----------|
+| Arquitetura Modular | ✅ |
+| Pipeline de Treinamento | ✅ |
 | API REST | ✅ |
+| Docker | ✅ |
+| Docker Compose | ✅ |
+| MLflow Tracking | ✅ |
 | Model Registry | ✅ |
-| Observabilidade com Prometheus/Grafana | ✅ |
-| Monitoramento de drift | ✅ |
-| Versionamento de Dados | ✅ |
-| Versionamento de Modelos | ✅ |
-| Testes Automatizados | **144 testes passando** |
-
-Além disso, utilizando otimização baseada em custo financeiro, o projeto alcançou um ganho estimado superior a:
-
-# 💲 +23 Milhões
-
-em retorno financeiro estimado quando comparado a estratégias tradicionais de aprovação.
+| Champion / Challenger | ✅ |
+| Monitoramento | ✅ |
+| Prometheus | ✅ |
+| GitHub Actions | ✅ |
+| Pytest | ✅ 144 testes |
+| Ruff | ✅ |
+| Black | ✅ |
 
 ---
 
-# 🏗️ O que este projeto demonstra
+# 🧱 Arquitetura
 
-Este projeto foi desenvolvido para demonstrar domínio prático das principais competências exigidas em posições de:
+A arquitetura foi organizada em módulos independentes para facilitar manutenção, testes e evolução do projeto.
 
-- Data Scientist
-- Machine Learning Engineer
-- Data Engineer
-- MLOps Engineer
-- AI Engineer
+```text
+                +----------------+
+                |   Raw Dataset  |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Data Ingestion |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Data Validation|
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Feature Eng.   |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Model Training |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                |   MLflow       |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Model Registry |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | FastAPI        |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Docker         |
+                +--------+-------+
+                         |
+                         ▼
+                +----------------+
+                | Monitoring     |
+                +----------------+
+```
 
-Durante seu desenvolvimento foram aplicados conceitos como:
+> Diagramas completos podem ser encontrados em **docs/diagrams/**.
 
-- Arquitetura em Camadas
-- Modularização
-- Clean Code
-- SOLID
-- Testes Automatizados
+---
+
+# 🎯 Objetivos Técnicos
+
+Este projeto foi desenvolvido para praticar e demonstrar conhecimentos em:
+
+- Machine Learning
+- Engenharia de Dados
+- Engenharia de Software
 - APIs REST
-- Versionamento de Dados
+- MLOps
+- Docker
+- Observabilidade
 - Versionamento de Modelos
-- Monitoramento
-- Explainability
-- Pipelines Reproduzíveis
-- Configuração por Ambientes
-- Engenharia de Features
-- Otimização Financeira
+- Deploy
+- Clean Architecture
+- Testes Automatizados
+- Boas práticas de produção
 
 ---
 
-# 🌎 Visão Geral da Plataforma
+# ⭐ Destaques
+
+O projeto foi estruturado utilizando princípios amplamente adotados na indústria:
+
+- SOLID
+- Clean Code
+- Modularização
+- Baixo acoplamento
+- Alta coesão
+- Logging estruturado
+- Testabilidade
+- Reprodutibilidade
+- Separação de responsabilidades
+- Pipeline desacoplado
+
+---
+
+# 🛠️ Stack Tecnológica
+
+O projeto foi desenvolvido utilizando ferramentas amplamente empregadas em ambientes corporativos.
+
+## Linguagens
+
+- Python 3.14
+
+---
+
+## Machine Learning
+
+- Scikit-Learn
+- XGBoost
+- LightGBM
+- CatBoost
+
+---
+
+## API
+
+- FastAPI
+- Uvicorn
+- Pydantic
+
+---
+
+## MLOps
+
+- MLflow
+- Model Registry (Champion / Challenger)
+- Docker
+- Docker Compose
+
+---
+
+## Observabilidade
+
+- Prometheus
+- Logging Estruturado
+
+> Estrutura preparada para integração com Grafana.
+
+---
+
+## Qualidade de Código
+
+- Pytest
+- Ruff
+- Black
+- Isort
+
+---
+
+## CI/CD
+
+- GitHub Actions
+
+---
+
+## Versionamento
+
+- Git
+- GitHub
+
+---
+
+# 📂 Estrutura do Projeto
 
 ```text
-                  DADOS BRUTOS
-
-                        │
-
-                        ▼
-
-             Ingestão de Dados (ETL)
-
-                        │
-
-                        ▼
-
-          Limpeza e Tratamento dos Dados
-
-                        │
-
-                        ▼
-
-          Engenharia de Atributos (Features)
-
-                        │
-
-                        ▼
-
-        Treinamento de Múltiplos Modelos
-
-                        │
-
-                        ▼
-
-              Registro no MLflow
-
-                        │
-
-                        ▼
-
-          Otimização Financeira (Threshold)
-
-                        │
-
-                        ▼
-
-             Modelo Campeão (Champion)
-
-                        │
-
-          ┌─────────────┴─────────────┐
-
-          ▼                           ▼
-
-      API REST                  Explainability
-
-          │                           │
-
-          ▼                           ▼
-
-     Predições                 SHAP Values
-
-          │
-
-          ▼
-
-      Monitoramento
-
-          │
-
-          ▼
-
-      Drift Detection
-
-```
-
----
-
-# 📚 Índice
-
-- [🚀 Sobre o Projeto](#-sobre-o-projeto)
-- [🎯 Objetivo](#-objetivo)
-- [💰 O diferencial](#-o-diferencial)
-- [📈 Resultado Obtido](#-resultado-obtido)
-- [🏗️ Arquitetura Completa](#️-arquitetura-completa)
-- [📂 Estrutura do Projeto](#-estrutura-do-projeto)
-- [⚙️ Pipeline de Dados](#️-pipeline-de-dados)
-- [🧠 Machine Learning](#-machine-learning)
-- [📊 Engenharia de Dados](#-engenharia-de-dados)
-- [🚀 API](#-api)
-- [🔬 Explainability](#-explainability)
-- [📈 Monitoramento](#-monitoramento)
-- [🧪 Testes Automatizados](#-testes-automatizados)
-- [🐳 Docker](#-docker)
-- [📦 Instalação](#-instalação)
-- [▶️ Como Executar](#️-como-executar)
-- [🗺️ Roadmap](#️-roadmap)
-- [👨‍💻 Autor](#-autor)
-
----
-
-> **"Machine Learning não termina quando o modelo é treinado. É justamente nesse momento que o verdadeiro trabalho começa."**
-
----
-# 🏗️ Arquitetura Completa
-
-Este projeto foi desenvolvido seguindo uma arquitetura modular inspirada em aplicações reais de Machine Learning utilizadas em produção.
-
-Ao invés de concentrar toda a lógica em um único notebook ou script Python, cada responsabilidade foi isolada em seu próprio módulo.
-
-Essa abordagem oferece diversas vantagens:
-
-- maior organização;
-- facilidade para manutenção;
-- código reutilizável;
-- facilidade para testes;
-- escalabilidade;
-- preparação para ambientes corporativos.
-
----
-
-# 🧩 Arquitetura Geral
-
-```mermaid
-flowchart LR
-
-A[Dataset CSV] --> B[Ingestion]
-
-B --> C[Cleaning]
-
-C --> D[Feature Engineering]
-
-D --> E[Validation]
-
-E --> F[Train Models]
-
-F --> G[MLflow]
-
-F --> H[Threshold Optimization]
-
-H --> I[Champion Model]
-
-I --> J[FastAPI]
-
-I --> K[Explainability]
-
-I --> L[Monitoring]
-
-J --> M[Predictions]
-
-L --> N[Drift Detection]
-
-K --> O[SHAP Values]
-```
-
----
-
-# 🏢 Arquitetura em Camadas
-
-O projeto foi dividido em camadas independentes.
-
-Cada camada possui uma única responsabilidade.
-
-```text
-┌────────────────────────────────────────────┐
-│                 API REST                   │
-└────────────────────────────────────────────┘
-                    │
-                    ▼
-┌────────────────────────────────────────────┐
-│          Explainability (SHAP)             │
-└────────────────────────────────────────────┘
-                    │
-                    ▼
-┌────────────────────────────────────────────┐
-│            Machine Learning                │
-└────────────────────────────────────────────┘
-                    │
-                    ▼
-┌────────────────────────────────────────────┐
-│       Feature Engineering                  │
-└────────────────────────────────────────────┘
-                    │
-                    ▼
-┌────────────────────────────────────────────┐
-│      Data Cleaning / Processing            │
-└────────────────────────────────────────────┘
-                    │
-                    ▼
-┌────────────────────────────────────────────┐
-│          Data Ingestion                    │
-└────────────────────────────────────────────┘
-                    │
-                    ▼
-┌────────────────────────────────────────────┐
-│               Raw Dataset                  │
-└────────────────────────────────────────────┘
-```
-
----
-
-# 📂 Organização dos Diretórios
-
-```text
-credit-risk-mlops
+credit-risk-mlops/
+
+├── .github/
+│   └── workflows/
+│       ├── docker.yml
+│       ├── lint.yml
+│       ├── tests.yml
+│       └── train.yml
 │
-├── data
-│   ├── raw
-│   ├── processed
-│   └── features.parquet
+├── docs/
+│   ├── architecture.md
+│   ├── deployment.md
+│   ├── tasklist.md
+│   └── diagrams/
 │
-├── models
+├── requirements/
 │
-├── reports
-│   ├── figures
-│   └── drift
+├── src/
+│   ├── api/
+│   ├── config/
+│   ├── evaluation/
+│   ├── explainability/
+│   ├── ingestion/
+│   ├── modeling/
+│   ├── monitoring/
+│   ├── processing/
+│   ├── validation/
+│   └── logger.py
 │
-├── docs
-│
-├── mlruns
-│
-├── src
-│
-├── tests
+├── tests/
 │
 ├── Dockerfile
-├── requirements.txt
+├── docker-compose.yml
+├── prometheus.yml
 ├── README.md
-└── tasklist.md
+└── pyproject.toml
 ```
 
 ---
 
-# 🧠 Estrutura da pasta src
+# ⚙️ Instalação
 
-Toda a inteligência do projeto está concentrada dentro da pasta **src**.
-
-Cada diretório representa um domínio específico.
-
-```text
-src/
-
-├── api/
-│
-├── config/
-│
-├── evaluation/
-│
-├── explainability/
-│
-├── ingestion/
-│
-├── modeling/
-│
-├── monitoring/
-│
-├── processing/
-│
-├── validation/
-│
-└── logger.py
-```
-
----
-
-# 📥 Fluxo da Ingestão
-
-```mermaid
-flowchart LR
-
-CSV --> LoadData
-
-LoadData --> Validation
-
-Validation --> Parquet
-
-Parquet --> Pipeline
-```
-
-Responsabilidades:
-
-- localizar os arquivos de entrada;
-- validar existência;
-- converter formatos;
-- preparar os dados para o pipeline.
-
----
-
-# 🧹 Fluxo de Processamento
-
-```mermaid
-flowchart LR
-
-RawData --> MissingValues
-
-MissingValues --> Encoding
-
-Encoding --> FeatureEngineering
-
-FeatureEngineering --> FinalDataset
-```
-
-Essa etapa prepara os dados para que os algoritmos consigam aprender corretamente.
-
-Ela inclui:
-
-- limpeza;
-- preenchimento de valores ausentes;
-- codificação de variáveis categóricas;
-- criação de novas features.
-
----
-
-# 🤖 Fluxo de Machine Learning
-
-```mermaid
-flowchart TD
-
-Dataset
-
-Dataset --> LogisticRegression
-
-Dataset --> XGBoost
-
-Dataset --> LightGBM
-
-Dataset --> CatBoost
-
-LogisticRegression --> Metrics
-
-XGBoost --> Metrics
-
-LightGBM --> Metrics
-
-CatBoost --> Metrics
-
-Metrics --> ChampionModel
-```
-
-Todos os modelos são treinados exatamente sobre o mesmo conjunto de dados.
-
-Isso garante uma comparação justa.
-
----
-
-# 📈 Registro dos Experimentos
-
-```mermaid
-flowchart LR
-
-Training --> MLflow
-
-MLflow --> Parameters
-
-MLflow --> Metrics
-
-MLflow --> Models
-
-MLflow --> Artifacts
-```
-
-Cada experimento registra automaticamente:
-
-- parâmetros;
-- métricas;
-- artefatos;
-- modelo treinado.
-
-Isso permite reproduzir qualquer treinamento futuramente.
-
----
-
-# 💰 Otimização Financeira
-
-Após o treinamento, o projeto executa uma etapa exclusiva.
-
-Ao invés de usar o Threshold padrão (0.50), ele procura automaticamente qual Threshold gera maior lucro financeiro.
-
-```mermaid
-flowchart LR
-
-Probabilidades
-
-Probabilidades --> Thresholds
-
-Thresholds --> BusinessMetric
-
-BusinessMetric --> MelhorThreshold
-```
-
-É aqui que o Machine Learning deixa de pensar apenas em estatística e passa a pensar em dinheiro.
-
----
-
-# 🌐 Arquitetura da API
-
-```mermaid
-sequenceDiagram
-
-Cliente->>API: POST /predict
-
-API->>Modelo: Carrega modelo
-
-Modelo->>Pipeline: Pré-processamento
-
-Pipeline->>Modelo: Dados prontos
-
-Modelo-->>API: Probabilidade
-
-API-->>Cliente: JSON
-```
-
-A API foi construída utilizando FastAPI.
-
-Ela é responsável por disponibilizar o modelo para qualquer aplicação.
-
----
-
-# 🔬 Explainability
-
-Após gerar uma previsão, também é possível explicar por que aquela decisão foi tomada.
-
-```mermaid
-flowchart LR
-
-Prediction
-
-Prediction --> SHAP
-
-SHAP --> FeatureImportance
-
-FeatureImportance --> Graphs
-```
-
-Isso aumenta a confiança no modelo e facilita auditorias.
-
----
-
-# 📊 Monitoramento
-
-Modelos sofrem degradação com o passar do tempo.
-
-Por isso existe um módulo dedicado para monitoramento.
-
-```mermaid
-flowchart TD
-
-NewData
-
-NewData --> Drift
-
-Drift --> PSI
-
-Drift --> KS
-
-Drift --> Wasserstein
-
-PSI --> Alert
-
-KS --> Alert
-
-Wasserstein --> Alert
-```
-
-Caso o comportamento dos dados mude significativamente, o sistema identifica automaticamente o problema.
-
----
-
-# 🧪 Fluxo dos Testes
-
-```mermaid
-flowchart TD
-
-Pytest
-
-Pytest --> API
-
-Pytest --> Processing
-
-Pytest --> Modeling
-
-Pytest --> Validation
-
-Pytest --> Explainability
-
-Pytest --> Monitoring
-
-Pytest --> Config
-
-Todos --> Resultado
-
-Resultado --> 140Testes
-```
-
-Todo o projeto é protegido por testes automatizados, garantindo estabilidade durante futuras alterações.
-
----
-
-# 🔄 Fluxo Completo do Projeto
-
-```mermaid
-flowchart TD
-
-CSV
-
-CSV --> Ingestion
-
-Ingestion --> Cleaning
-
-Cleaning --> Features
-
-Features --> Validation
-
-Validation --> Training
-
-Training --> MLflow
-
-Training --> Threshold
-
-Threshold --> ChampionModel
-
-ChampionModel --> API
-
-ChampionModel --> SHAP
-
-ChampionModel --> Monitoring
-
-API --> Prediction
-
-SHAP --> Explainability
-
-Monitoring --> Drift
-
-Prediction --> Cliente
-```
-
----
-
-# 🎯 Filosofia da Arquitetura
-
-Cada módulo possui uma única responsabilidade.
-
-Essa decisão foi tomada seguindo princípios de Engenharia de Software como:
-
-- Clean Architecture
-- SOLID
-- Separation of Concerns
-- Single Responsibility Principle
-
-O resultado é um projeto organizado, escalável e preparado para receber novas funcionalidades sem necessidade de grandes refatorações.
-
----
-
-# 🚀 Como Executar o Projeto
-
-## Pré-requisitos
-
-Antes de iniciar, certifique-se de possuir instalado:
-
-| Ferramenta | Versão Recomendada |
-|------------|-------------------:|
-| Python | 3.14+ |
-| Git | Última versão |
-| Docker | Opcional |
-| DVC | Última versão |
-| MLflow | Última versão |
-
----
-
-# 📥 Clonando o Projeto
+## Clone o repositório
 
 ```bash
 git clone https://github.com/DSEduhpy/credit-risk-mlops.git
@@ -739,352 +352,362 @@ cd credit-risk-mlops
 
 ---
 
-# 📦 Criando Ambiente Virtual
+## Crie um ambiente virtual
 
-### Windows
+Windows
 
-```bash
+```powershell
 python -m venv .venv
 
 .venv\Scripts\activate
 ```
 
-### Linux / Mac
+Linux
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 
 source .venv/bin/activate
 ```
 
 ---
 
-# 📚 Instalando Dependências
-
-Para desenvolvimento local e CI:
+## Instale as dependências
 
 ```bash
 pip install -r requirements/dev.txt
 ```
 
-Para execução em produção ou container:
-
-```bash
-pip install -r requirements/prod.txt
-```
-
 ---
 
-# ⚙️ Configurando Variáveis de Ambiente
+# ▶️ Executando Localmente
 
-O projeto utiliza um arquivo `.env` para definir variáveis de ambiente.
-
-Exemplo:
-
-```env
-CREDIT_RISK_ENV=dev
-```
-
-Ambientes disponíveis:
-
-- dev
-- test
-- prod
-
----
-
-# ▶️ Executando o Pipeline
-
-## Executar Pipeline Completo
-
-```bash
-dvc repro
-```
-
----
-
-## Executar apenas o treinamento
-
-```bash
-python -m src.modeling.train
-```
-
----
-
-## Executar API
+## Executar a API
 
 ```bash
 uvicorn src.api.app:app --reload
 ```
 
-Acesse:
+A API ficará disponível em:
+
+```
+http://localhost:8000
+```
+
+---
+
+## Documentação Interativa
+
+Swagger
 
 ```
 http://localhost:8000/docs
 ```
 
-para visualizar automaticamente toda a documentação Swagger.
+ReDoc
+
+```
+http://localhost:8000/redoc
+```
 
 ---
 
-# 📊 Executando o MLflow
+# 🐳 Executando com Docker
+
+Construir a imagem
 
 ```bash
-mlflow ui
+docker build -t credit-risk-api .
 ```
 
-Depois acesse
+Executar via Docker Compose
+
+```bash
+docker compose up
+```
+
+A API ficará disponível em
+
+```
+http://localhost:8000
+```
+
+---
+
+# 📈 MLflow
+
+O projeto utiliza MLflow para rastreamento dos experimentos.
+
+Após iniciar os containers:
 
 ```
 http://localhost:5000
 ```
 
+No MLflow são registrados:
+
+- parâmetros
+- métricas
+- artefatos
+- modelos
+- histórico dos treinamentos
+
 ---
 
-# 🧪 Executando os Testes
+# 🏆 Model Registry
 
-Todos os testes:
+O projeto implementa um Registry simplificado para gerenciamento dos modelos.
+
+Fluxo atual:
+
+```text
+Treinamento
+
+↓
+
+Novo Modelo
+
+↓
+
+Registry
+
+↓
+
+Champion
+
+↓
+
+API
+```
+
+O Registry oferece suporte para:
+
+- Versionamento
+- Champion
+- Challenger
+- Histórico
+- Rollback
+- Modelo ativo
+
+---
+
+# 🌐 Endpoints da API
+
+| Método | Endpoint | Descrição |
+|---------|----------|-----------|
+| GET | `/` | Informações da API |
+| GET | `/health` | Health Check |
+| GET | `/ready` | Readiness Check |
+| GET | `/version` | Versão da aplicação |
+| POST | `/predict` | Inferência de risco |
+
+---
+
+# 📊 Fluxo de Predição
+
+```text
+Cliente
+
+↓
+
+FastAPI
+
+↓
+
+Modelo Champion
+
+↓
+
+Predição
+
+↓
+
+Resposta JSON
+```
+
+---
+
+# 🧪 Testes
+
+O projeto possui testes automatizados para garantir estabilidade durante futuras evoluções.
+
+Executar:
 
 ```bash
 pytest
 ```
 
-Executar apenas testes rápidos:
+Resultado atual:
 
-```bash
-pytest -m unit
+```
+144 testes aprovados
 ```
 
-Executar integração:
-
-```bash
-pytest -m integration
-```
-
-Executar API:
-
-```bash
-pytest tests/api
-```
-
----
-
-# ✅ Qualidade de Código
-
-Verificação Ruff
+Também é possível validar toda a qualidade do código:
 
 ```bash
 ruff check .
+
+black --check .
+
+isort . --check-only
 ```
 
+Todas as verificações encontram-se aprovadas.---
+
+# 📈 Observabilidade
+
+A aplicação foi preparada para monitoramento contínuo utilizando métricas de infraestrutura e de Machine Learning.
+
+## Recursos implementados
+
+- Logging estruturado
+- Monitoramento de inferências
+- Monitoramento do modelo Champion
+- Detecção de degradação do modelo
+- Persistência de métricas
+- Alertas de monitoramento
+- Health Checks
+- Readiness Checks
+
 ---
 
-Formatação Black
+## Prometheus
 
-```bash
-black .
+O projeto disponibiliza métricas compatíveis com Prometheus.
+
+Após iniciar os containers:
+
+```
+http://localhost:9090
 ```
 
----
-
-Organização de Imports
-
-```bash
-isort .
-```
-
----
-
-# 📈 Tecnologias Utilizadas
-
-| Categoria | Tecnologias |
-|-----------|-------------|
-| Linguagem | Python |
-| Machine Learning | Scikit-Learn |
-| Gradient Boosting | XGBoost, LightGBM, CatBoost |
-| Engenharia de Dados | Pandas, PyArrow |
-| API | FastAPI |
-| Explainability | SHAP |
-| Versionamento | Git |
-| Versionamento de Dados | DVC |
-| Experiment Tracking | MLflow |
-| Testes | Pytest |
-| Containers | Docker |
-| Visualização | Matplotlib |
-
----
-
-# 📊 Principais Competências Demonstradas
-
-✔ Engenharia de Dados
-
-✔ Ciência de Dados
-
-✔ Machine Learning
-
-✔ MLOps
-
-✔ Engenharia de Software
-
-✔ APIs REST
-
-✔ Versionamento de Dados
-
-✔ Versionamento de Modelos
-
-✔ Explainable AI
-
-✔ Monitoramento de Modelos
-
-✔ Testes Automatizados
-
-✔ Arquitetura Modular
-
-✔ Configuração por Ambientes
-
-✔ Feature Engineering
-
-✔ Business Driven Machine Learning
-
-✔ Threshold Optimization
-
-✔ Clean Code
-
-✔ SOLID
-
-✔ Documentação Técnica
-
----
-
-# 🧪 Cobertura do Projeto
-
-Atualmente o projeto possui cobertura sobre praticamente todos os componentes críticos.
-
-## Componentes testados
-
-✅ Configuração
-
-✅ API
-
-✅ Engenharia de Features
-
-✅ Limpeza
-
-✅ Validação
-
-✅ Explainability
-
-✅ Métricas
-
-✅ Métricas Financeiras
-
-✅ Pipeline
-
-✅ Logger
-
-✅ Modelagem
-
----
-
-## Resultado Atual
+O arquivo de configuração encontra-se em:
 
 ```text
-140 testes automatizados
-
-140 aprovados
-
-0 falhas
+prometheus.yml
 ```
 
 ---
 
-# 🛣️ Roadmap
+## Grafana
 
-## Engenharia
+A arquitetura foi preparada para integração com Grafana para criação de dashboards operacionais.
 
-- [x] Estrutura modular
-- [x] Configuração por ambiente
-- [x] Logger estruturado
-- [x] Arquitetura escalável
+Exemplos de métricas monitoráveis:
 
----
-
-## Dados
-
-- [x] ETL
-- [x] Versionamento com DVC
-- [x] Feature Engineering
-- [x] Data Validation
+- Latência da API
+- Quantidade de requisições
+- Tempo de resposta
+- Disponibilidade
+- Drift de modelo
+- Uso do modelo Champion
+- Métricas de negócio
 
 ---
 
-## Machine Learning
+# 🔄 CI/CD
 
-- [x] Logistic Regression
-- [x] XGBoost
-- [x] CatBoost
-- [x] LightGBM
-- [x] Benchmark entre modelos
-- [x] Threshold Financeiro
+O projeto possui pipelines automatizadas utilizando GitHub Actions.
 
----
+## Workflows
 
-## Explainability
+| Workflow | Objetivo |
+|-----------|----------|
+| tests.yml | Executa toda a suíte de testes |
+| lint.yml | Verifica qualidade do código |
+| docker.yml | Valida construção da imagem Docker |
+| train.yml | Pipeline de treinamento |
 
-- [x] SHAP
-- [x] Feature Importance
+Os workflows ficam disponíveis em:
 
----
-
-## API
-
-- [x] FastAPI
-- [x] Swagger
-- [x] Endpoint de Predição
+```text
+.github/workflows/
+```
 
 ---
 
-## Monitoramento
+# ☁️ Preparação para Cloud
 
-- [x] PSI
-- [x] KS
-- [x] Wasserstein Distance
+O projeto foi estruturado visando futura implantação em provedores de nuvem.
+
+A arquitetura foi organizada para facilitar deploy em serviços como:
+
+- AWS
+- Azure
+- Google Cloud Platform
+
+A documentação de deploy encontra-se em:
+
+```text
+docs/deployment.md
+```
 
 ---
 
-## Testes
+# 📚 Documentação
 
-- [x] Unitários
-- [x] Integração
-- [x] API
-- [x] Configuração
-- [x] Explainability
+Toda a documentação técnica está organizada na pasta **docs**.
+
+| Documento | Descrição |
+|------------|-----------|
+| architecture.md | Arquitetura do sistema |
+| deployment.md | Estratégia de deploy |
+| tasklist.md | Evolução do projeto |
+| diagrams/architecture.mmd | Arquitetura Mermaid |
+| diagrams/cicd.mmd | Pipeline CI/CD |
 
 ---
 
-## Próximos Passos
+# 📌 Roadmap
 
-- [ ] Deploy em Cloud (AWS / Azure / GCP)
-- [ ] CI/CD com GitHub Actions
-- [ ] Registro automático de modelos
-- [ ] Dashboard de Monitoramento
-- [ ] Pipeline de Inferência em Tempo Real
-- [ ] Observabilidade Completa
-- [ ] Kubernetes
-- [ ] Model Registry em Produção
+## ✅ Concluído
+
+- Pipeline completo de treinamento
+- Benchmark entre modelos
+- Engenharia de Features
+- Avaliação financeira
+- API FastAPI
+- Docker
+- Docker Compose
+- MLflow Tracking
+- Model Registry
+- Champion / Challenger
+- Monitoramento
+- Prometheus
+- GitHub Actions
+- Logging estruturado
+- Testes automatizados
+- Arquitetura modular
+
+---
+
+## 🔜 Evoluções futuras
+
+- Deploy em AWS
+- Terraform (Infrastructure as Code)
+- Kubernetes
+- Helm Charts
+- Feature Store
+- Evidently AI
+- Grafana Dashboards completos
+- Monitoramento de Drift em produção
+- Auto Retraining
+- Model Serving escalável
 
 ---
 
 # 🤝 Contribuições
 
-Contribuições são muito bem-vindas.
+Contribuições são bem-vindas.
 
-Caso encontre algum problema ou tenha sugestões de melhoria:
+Caso deseje colaborar:
 
 1. Faça um Fork
 2. Crie uma Branch
-3. Faça suas alterações
-4. Envie um Pull Request
+3. Realize suas alterações
+4. Execute toda a suíte de testes
+5. Abra um Pull Request
 
 ---
 
@@ -1092,56 +715,41 @@ Caso encontre algum problema ou tenha sugestões de melhoria:
 
 ## Eduardo de Castro Vieira
 
-**Cientista de Dados | Engenheiro de Dados | Machine Learning | MLOps**
+**Data Scientist • Data Engineer • Machine Learning Engineer**
 
-Apaixonado por transformar dados em decisões inteligentes.
+- GitHub: https://github.com/DSEduhpy
+- LinkedIn: *(adicione seu perfil)*
+- Email: *(adicione seu e-mail profissional)*
 
-Especializado em:
+---
 
-- Machine Learning
+# ⭐ Aprendizados
+
+Durante o desenvolvimento deste projeto foram aplicados conceitos de:
+
+- Engenharia de Software
 - Engenharia de Dados
-- Inteligência Artificial
-- Python
-- SQL
+- Machine Learning
 - MLOps
-- FastAPI
+- APIs REST
+- Docker
 - MLflow
-- DVC
+- Observabilidade
+- Testes Automatizados
+- Arquitetura Modular
+- Clean Code
+- SOLID
+- CI/CD
+- Versionamento de Modelos
+- Logging Estruturado
+- Deploy
 
-GitHub
-
-> https://github.com/DSEduhpy
-
-LinkedIn
-
-> https://linkedin.com/in/eduardocastrovieira
-
----
-
-# ⭐ Gostou do projeto?
-
-Se este projeto foi útil para você:
-
-⭐ Deixe uma estrela no repositório.
-
-📢 Compartilhe.
-
-🤝 Conecte-se comigo no LinkedIn.
-
-Isso ajuda bastante no crescimento do projeto e incentiva a criação de novos conteúdos.
+Este projeto representa uma implementação prática de um pipeline completo de Machine Learning inspirado em ambientes de produção, reunindo boas práticas de desenvolvimento, engenharia e operações para criação, disponibilização e monitoramento de modelos preditivos.
 
 ---
 
-<div align="center">
+<p align="center">
 
-# Obrigado pela visita!
+⭐ Se este projeto foi útil para você, considere deixar uma estrela no repositório.
 
-### "Machine Learning não é apenas treinar modelos.
-
-### É construir sistemas confiáveis capazes de gerar valor para o negócio."
-
----
-
-**Desenvolvido por Eduardo de Castro Vieira**
-
-</div>
+</p>

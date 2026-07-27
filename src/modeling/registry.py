@@ -134,7 +134,8 @@ class ModelRegistry:
             self._save_registry()
             logger.info(
                 "Rollback aplicado",
-                extra={"model_name": model_name, "target_stage": entry["stage"]},
+                extra={"model_name": model_name,
+                       "target_stage": entry["stage"]},
             )
             return deepcopy(entry)
 
