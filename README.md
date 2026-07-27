@@ -718,8 +718,8 @@ Caso deseje colaborar:
 **Data Scientist • Data Engineer • Machine Learning Engineer**
 
 - GitHub: https://github.com/DSEduhpy
-- LinkedIn: *(adicione seu perfil)*
-- Email: *(adicione seu e-mail profissional)*
+- LinkedIn: https://www.linkedin.com/in/eduardo-de-castro-vieira-5b061027b/
+- Email: eduardodecastroep@gmail.com
 
 ---
 
