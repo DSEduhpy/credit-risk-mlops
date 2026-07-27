@@ -241,8 +241,9 @@ flowchart LR
 
 ## 13. Implantação e CI
 
-- O projeto agora oferece um workflow GitHub Actions completo em `.github/workflows/ci.yml`.
-- O CI inclui cache de pip, verificação de versões, Ruff, Black, isort, Pytest e upload de artefatos de cobertura.
-- O deploy em container é suportado por `Dockerfile` otimizado e `docker-compose.yml` profissional.
-- O Compose cria serviços `api` e `mlflow` em uma rede isolada com volumes persistentes.
-- `src/monitoring` depende de `src/config`.
+- O projeto agora oferece workflows separados em `.github/workflows/` para lint, testes, build Docker e treinamento.
+- O pipeline de validação inclui cache de dependências, Ruff, Black, isort e Pytest.
+- O deploy em container é suportado por `Dockerfile` otimizado e `docker-compose.yml` com API, Prometheus e Grafana.
+- O Compose cria uma rede isolada com volumes persistentes para modelos, MLruns e logs.
+- A API expõe endpoints de health, readiness e métricas para observabilidade inicial.
+- A infraestrutura de nuvem real (AWS, ECR, EC2, IAM, Security Groups, Terraform) está preparada como estrutura de referência para implantação futura, com validação real condicionada a credenciais externas.

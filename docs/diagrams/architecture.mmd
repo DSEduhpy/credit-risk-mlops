@@ -1,0 +1,12 @@
+flowchart TD
+    A[Dados brutos] --> B[Ingestão]
+    B --> C[Processamento]
+    C --> D[Engenharia de Features]
+    D --> E[Treinamento]
+    E --> F[MLflow]
+    E --> G[Model Registry]
+    E --> H[API FastAPI]
+    H --> I[Prometheus]
+    H --> J[Grafana]
+    H --> K[Health Checks]
+    F --> G

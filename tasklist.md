@@ -12,14 +12,16 @@
 - [x] Threshold otimizado por custo de negócio
 - [x] Simulação de impacto financeiro implementada
 - [x] Explainability SHAP integrado
+- [x] CI com workflows separados para lint, testes, Docker e treinamento
+- [x] Observabilidade básica com Prometheus e Grafana
+- [x] Documentação de deployment e arquitetura atualizada
 
 ## 🚧 Em andamento
 
-- [ ] Métricas de estabilidade de modelo em ambiente de produção
+- [ ] Registro profissional de modelos com promoção automática
+- [ ] Deploy automatizado em nuvem com credenciais reais
 - [ ] Métricas de drift consolidadas para detecção de distribuição
-- [ ] Pipeline compatível com GitHub Actions / CI-CD
-- [ ] Registro de artefatos e versionamento de modelo no MLflow refinado
-- [ ] Documentação técnica dos fluxos de arquitetura e projeto
+- [ ] Alertas avançados e SLOs de inferência
 
 ## 📅 Próximas versões
 

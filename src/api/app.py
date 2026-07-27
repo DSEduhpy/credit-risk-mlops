@@ -1,115 +1,40 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
-from typing import Any, Dict
+from typing import Dict
 
-import joblib
-import mlflow
 import pandas as pd
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException, Request
 
-from src.config import MLFLOW_TRACKING_URI, MODEL_PATH
-from src.logger import get_logger
+from src.api.config import api_settings
+from src.api.schemas import PredictRequest, PredictResponse
+from src.api.services import ModelService
+from src.logger import get_logger, log_inference, set_correlation_id
+from src.monitoring.metrics import ModelMetrics
+from src.monitoring.prometheus import PrometheusMetrics
 
 load_dotenv()
 
 logger = get_logger(__name__)
 
-model = None
-
-
-def load_model() -> Any:
-    """
-    Carrega modelo local ou do MLflow.
-    """
-
-    model_path = Path(MODEL_PATH)
-
-    try:
-        logger.info(
-            "Tentando carregar modelo local",
-            extra={"model_path": str(model_path)},
-        )
-
-        return joblib.load(model_path)
-
-    except Exception:
-        logger.warning("Modelo local não encontrado. Tentando MLflow.")
-
-    try:
-        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-
-        model_candidates = list(Path(MLFLOW_TRACKING_URI).rglob("*/artifacts/model"))
-
-        if model_candidates:
-            latest_model = sorted(
-                model_candidates,
-                key=lambda p: p.stat().st_mtime,
-                reverse=True,
-            )[0]
-
-            logger.info(
-                "Carregando modelo do MLflow",
-                extra={"mlflow_model_path": str(latest_model)},
-            )
-
-            return mlflow.sklearn.load_model(str(latest_model))
-
-    except Exception:
-        logger.warning("Falha ao carregar modelo do MLflow.")
-
-    raise FileNotFoundError("Modelo não encontrado nem em models/ nem no MLflow local.")
+model_service = ModelService()
+metrics = ModelMetrics()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model
-
     try:
-        model = load_model()
+        model_service.load_model()
     except FileNotFoundError:
         logger.warning("Nenhum modelo encontrado durante inicialização.")
-        model = None
 
     yield
 
 
 app = FastAPI(
-    title="Credit Risk MLOps API",
+    title=api_settings.title,
+    version=api_settings.version,
     lifespan=lifespan,
 )
-
-
-class PredictRequest(BaseModel):
-    loan_amnt: float = Field(gt=0)
-    int_rate: float
-    installment: float
-    annual_inc: float = Field(gt=0)
-    dti: float
-
-    delinq_2yrs: float
-    fico_range_low: float
-
-    open_acc: float
-    pub_rec: float
-    revol_bal: float
-    revol_util: float
-
-    total_acc: float
-    mort_acc: float
-    pub_rec_bankruptcies: float
-
-    home_ownership_encoded: float
-    purpose_encoded: float
-
-    loan_amnt_to_income: float
-    fico_avg: float
-
-
-class PredictResponse(BaseModel):
-    prediction: int
-    probability: float
 
 
 @app.get("/health")
@@ -117,27 +42,48 @@ def health_check() -> Dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/ready")
+def readiness_check() -> Dict[str, str]:
+    if model_service.model is None:
+        return {"status": "not_ready"}
+    return {"status": "ready"}
+
+
 @app.get("/version")
 def version() -> Dict[str, str]:
     return {
-        "version": "1.0.0",
-        "service": "credit-risk-mlops-api",
+        "version": api_settings.version,
+        "service": api_settings.service_name,
     }
 
 
+@app.get("/metrics")
+def metrics_endpoint() -> str:
+    return PrometheusMetrics(metrics).render()
+
+
 @app.post("/predict", response_model=PredictResponse)
-def predict(request: PredictRequest) -> PredictResponse:
-    global model
+def predict(request: PredictRequest, request_obj: Request) -> PredictResponse:
+    correlation_id = request_obj.headers.get("x-request-id") or set_correlation_id()
+    request_obj.state.correlation_id = correlation_id
 
     try:
-        if model is None:
-            model = load_model()
+        if model_service.model is None:
+            model_service.load_model()
 
         features = pd.DataFrame([request.model_dump()])
+        probability = float(model_service.model.predict_proba(features)[:, 1][0])
+        prediction = int(model_service.model.predict(features)[0])
 
-        probability = float(model.predict_proba(features)[:, 1][0])
-
-        prediction = int(model.predict(features)[0])
+        log_inference(
+            request_id=correlation_id,
+            model="champion",
+            prediction=probability,
+            latency_ms=0.0,
+            features=request.model_dump(),
+            threshold=0.5,
+        )
+        metrics.record_inference(probability=probability, prediction=prediction)
 
         return PredictResponse(
             prediction=prediction,
@@ -145,13 +91,9 @@ def predict(request: PredictRequest) -> PredictResponse:
         )
 
     except Exception as error:
-        import traceback
-
-        traceback.print_exc()
-
         logger.error(
             "Falha na inferência",
-            extra={"error": str(error)},
+            extra={"error": str(error), "request_id": correlation_id},
         )
 
         raise HTTPException(

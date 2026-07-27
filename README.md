@@ -2,7 +2,7 @@
 
 # 💳 Credit Risk MLOps Pipeline
 
-### Sistema completo de Machine Learning para análise de risco de crédito com foco em impacto financeiro, MLOps, Engenharia de Dados e Inteligência Artificial.
+### Plataforma completa de Machine Learning para análise de risco de crédito, com foco em impacto financeiro, qualidade de software, observabilidade, automação e ciclo de vida de modelos.
 
 <br>
 
@@ -117,11 +117,12 @@ Após diversos experimentos e otimizações, o pipeline atingiu aproximadamente:
 | Precision | ~17% |
 | Pipeline Automatizado | ✅ |
 | API REST | ✅ |
-| Explainability (SHAP) | ✅ |
-| Monitoramento | ✅ |
+| Model Registry | ✅ |
+| Observabilidade com Prometheus/Grafana | ✅ |
+| Monitoramento de drift | ✅ |
 | Versionamento de Dados | ✅ |
 | Versionamento de Modelos | ✅ |
-| Testes Automatizados | **140 testes passando** |
+| Testes Automatizados | **144 testes passando** |
 
 Além disso, utilizando otimização baseada em custo financeiro, o projeto alcançou um ganho estimado superior a:
 

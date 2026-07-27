@@ -1,0 +1,7 @@
+flowchart LR
+    A[Push / PR] --> B[Lint]
+    B --> C[Testes]
+    C --> D[Build Docker]
+    D --> E[Training]
+    E --> F[Artifact Upload]
+    F --> G[Deploy Manual / Future]
