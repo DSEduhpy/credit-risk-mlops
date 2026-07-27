@@ -1,0 +1,13 @@
+# Dependências adicionais para desenvolvimento, linting, formatação e testes.
+# Versões fixas para manter a mesma experiência em CI e local.
+
+-r base.txt
+
+black==26.5.1
+isort==8.0.1
+pytest==9.1.1
+pytest-cov==7.1.0
+ruff==0.15.21
+
+# Ferramentas úteis para desenvolvimento local
+pre-commit==4.6.0

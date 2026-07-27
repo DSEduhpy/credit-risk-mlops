@@ -19,9 +19,11 @@ import pytest
 # yet expose the exact function names tested below, the test file documents
 # the EXPECTED interface that the module must satisfy.
 # ---------------------------------------------------------------------------
-from src.evaluation.business_metrics import (compute_business_profit,
-                                             compute_profit_by_threshold,
-                                             find_optimal_threshold)
+from src.evaluation.business_metrics import (
+    compute_business_profit,
+    compute_profit_by_threshold,
+    find_optimal_threshold,
+)
 
 # ---------------------------------------------------------------------------
 # Fixtures

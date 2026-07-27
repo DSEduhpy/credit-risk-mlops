@@ -16,8 +16,13 @@ from __future__ import annotations
 
 import os
 
-from src.config.base import (APIConfig, BaseConfig, LoggingConfig,
-                             MLflowConfig, MonitoringConfig)
+from src.config.base import (
+    APIConfig,
+    BaseConfig,
+    LoggingConfig,
+    MLflowConfig,
+    MonitoringConfig,
+)
 
 
 class _ProdLoggingConfig(LoggingConfig):

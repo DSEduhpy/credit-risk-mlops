@@ -238,4 +238,11 @@ flowchart LR
 - `src/logger` é utilizado por quase todos os domínios.
 - `src/modeling` depende de `src/evaluation`.
 - `src/api` depende de `src/config` e `src/logger`.
+
+## 13. Implantação e CI
+
+- O projeto agora oferece um workflow GitHub Actions completo em `.github/workflows/ci.yml`.
+- O CI inclui cache de pip, verificação de versões, Ruff, Black, isort, Pytest e upload de artefatos de cobertura.
+- O deploy em container é suportado por `Dockerfile` otimizado e `docker-compose.yml` profissional.
+- O Compose cria serviços `api` e `mlflow` em uma rede isolada com volumes persistentes.
 - `src/monitoring` depende de `src/config`.

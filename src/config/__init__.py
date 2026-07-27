@@ -28,10 +28,18 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from src.config.base import (PROJECT_ROOT, APIConfig, BaseConfig,
-                             BusinessConfig, LoggingConfig, MLflowConfig,
-                             ModelConfig, MonitoringConfig, PathConfig,
-                             ValidationConfig)
+from src.config.base import (
+    PROJECT_ROOT,
+    APIConfig,
+    BaseConfig,
+    BusinessConfig,
+    LoggingConfig,
+    MLflowConfig,
+    ModelConfig,
+    MonitoringConfig,
+    PathConfig,
+    ValidationConfig,
+)
 
 # ---------------------------------------------------------------------------
 # Environment resolution

@@ -19,9 +19,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.config.base import (APIConfig, BaseConfig, LoggingConfig,
-                             MLflowConfig, ModelConfig, MonitoringConfig,
-                             PathConfig, ValidationConfig)
+from src.config.base import (
+    APIConfig,
+    BaseConfig,
+    LoggingConfig,
+    MLflowConfig,
+    ModelConfig,
+    MonitoringConfig,
+    PathConfig,
+    ValidationConfig,
+)
 
 # ---------------------------------------------------------------------------
 # Isolated test paths — tests must never read/write production data dirs

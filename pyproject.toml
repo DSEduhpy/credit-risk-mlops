@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 88
+target-version = ['py314']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = 'black'
+line_length = 88
+known_first_party = ['src']
+known_third_party = ['fastapi', 'pydantic', 'numpy', 'pandas', 'matplotlib', 'scikit_learn', 'mlflow', 'dvc', 'shap', 'xgboost', 'lightgbm']

@@ -17,6 +17,8 @@
 
 <br>
 
+![GitHub Actions](https://github.com/DSEduhpy/credit-risk-mlops/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://img.shields.io/badge/Coverage-aguardando%20CI-lightgrey?style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/DSEduhpy/credit-risk-mlops?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/DSEduhpy/credit-risk-mlops?style=social)
 
@@ -758,8 +760,16 @@ source .venv/bin/activate
 
 # 📚 Instalando Dependências
 
+Para desenvolvimento local e CI:
+
 ```bash
-pip install -r requirements.txt
+pip install -r requirements/dev.txt
+```
+
+Para execução em produção ou container:
+
+```bash
+pip install -r requirements/prod.txt
 ```
 
 ---

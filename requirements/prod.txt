@@ -1,0 +1,4 @@
+# Dependências mínimas necessárias em produção.
+# Não inclui ferramentas de desenvolvimento ou testes.
+
+-r base.txt

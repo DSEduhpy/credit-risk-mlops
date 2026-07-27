@@ -19,6 +19,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
 # TestClient import — starlette is a FastAPI dependency, always available
 from fastapi.testclient import TestClient
 
@@ -45,9 +46,11 @@ def test_client(mock_model):
     - joblib.load: returns mock_model regardless of path
     - MLflow: suppressed to avoid tracking during tests
     """
-    with patch("joblib.load", return_value=mock_model), patch(
-        "mlflow.set_experiment"
-    ), patch("mlflow.start_run"):
+    with (
+        patch("joblib.load", return_value=mock_model),
+        patch("mlflow.set_experiment"),
+        patch("mlflow.start_run"),
+    ):
         from src.api.app import app
 
         client = TestClient(app, raise_server_exceptions=True)

@@ -7,11 +7,17 @@ column.
 """
 
 from src.config import FEATURES_PATH, MODEL_PATH, TARGET_COLUMN
-from src.explainability.explain import (FIGURES_DIR, MAX_SAMPLES,
-                                        create_explainer, generate_shap_values,
-                                        load_data, load_model,
-                                        plot_feature_importance, plot_summary,
-                                        sample_data)
+from src.explainability.explain import (
+    FIGURES_DIR,
+    MAX_SAMPLES,
+    create_explainer,
+    generate_shap_values,
+    load_data,
+    load_model,
+    plot_feature_importance,
+    plot_summary,
+    sample_data,
+)
 
 
 def test_imports():

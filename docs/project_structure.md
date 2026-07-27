@@ -160,7 +160,11 @@ Quem utiliza:
 
 - `Dockerfile`: define container da aplicação.
 - `dvc.yaml` e `dvc.lock`: pipeline e versionamento de artefatos.
-- `requirements.txt`: dependências de runtime e desenvolvimento.
+- `requirements/`: dependências separadas por ambiente.
+  - `requirements/base.txt`: dependências de execução.
+  - `requirements/dev.txt`: dependências de desenvolvimento e testes.
+  - `requirements/prod.txt`: dependências de produção.
+- `requirements.txt`: arquivo de compatibilidade legada que referencia `requirements/dev.txt`.
 - `pytest.ini`: configuração do pytest.
 - `README.md`: visão geral do projeto.
 - `tasklist.md`: roadmap de entregas.

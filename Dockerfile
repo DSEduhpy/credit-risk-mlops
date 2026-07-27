@@ -1,13 +1,18 @@
-FROM python:3.12-slim
+FROM python:3.14-slim AS base
 
+# Define o diretório de trabalho do container.
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Evita geração de arquivos pyc e permite saída imediata no terminal.
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 
-COPY . .
+# Instala apenas dependências de produção.
+COPY requirements requirements
+RUN pip install --no-cache-dir -r requirements/prod.txt
 
-ENV PYTHONUNBUFFERED=1
+# Copia apenas o código-fonte e arquivos necessários para execução.
+COPY src ./src
+COPY README.md ./
 
 EXPOSE 8000
 

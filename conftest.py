@@ -234,10 +234,13 @@ def patched_mlflow():
     Patch MLflow tracking so tests never write to mlruns/.
     Yields a MagicMock representing the mlflow module.
     """
-    with patch("mlflow.start_run"), patch("mlflow.log_metric"), patch(
-        "mlflow.log_param"
-    ), patch("mlflow.log_artifact"), patch("mlflow.set_experiment"), patch(
-        "mlflow.sklearn.log_model"
+    with (
+        patch("mlflow.start_run"),
+        patch("mlflow.log_metric"),
+        patch("mlflow.log_param"),
+        patch("mlflow.log_artifact"),
+        patch("mlflow.set_experiment"),
+        patch("mlflow.sklearn.log_model"),
     ):
         yield
 

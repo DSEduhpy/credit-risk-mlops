@@ -7,8 +7,13 @@ for local development: verbose logging, reload enabled, monitoring disabled.
 
 from __future__ import annotations
 
-from src.config.base import (APIConfig, BaseConfig, LoggingConfig,
-                             MLflowConfig, MonitoringConfig)
+from src.config.base import (
+    APIConfig,
+    BaseConfig,
+    LoggingConfig,
+    MLflowConfig,
+    MonitoringConfig,
+)
 
 
 class _DevLoggingConfig(LoggingConfig):

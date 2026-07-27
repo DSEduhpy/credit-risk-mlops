@@ -1,5 +1,7 @@
+# Nome que será exibido no GitHub Actions
 name: Credit Risk CI
 
+# Sempre que alguém fizer git push ou abrir um pull request, o workflow começa.
 on:
 
   push:
@@ -14,14 +16,15 @@ on:
       - main
       - master
 
+# Um worfklow é composto por jobs e pode ter vários jobs. Cada job é executado em um runner, que é uma máquina virtual que executa o código do workflow. Nesse caso teremos apenas um: tests
 jobs:
 
   tests:
-
+    # O GitHub cria uma máquina Linux
     runs-on: ubuntu-latest
 
     steps:
-
+        # O primeiro passo é fazer o checkout do repositório, ou seja, baixar o código do repositório para a máquina virtual.
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -32,31 +35,60 @@ jobs:
           python-version: "3.14"
 
       - name: Upgrade pip
+        
+        run: |
+          python -m pip install --upgrade pip
 
+      - name: Cache do pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/base.txt', 'requirements/dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip
 
       - name: Install dependencies
-
+        # Instala as dependências de desenvolvimento através do arquivo dev.txt
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+
+      - name: Exibir versões das ferramentas
+        run: |
+          python --version
+          pip --version
+          black --version
+          isort --version
+          ruff --version
+          pytest --version
 
       - name: Ruff
-
+        # Verifica se o código está de acordo com as regras de linting definidas pelo Ruff
         run: |
           ruff check .
 
       - name: Black
-
         run: |
           black --check .
 
       - name: isort
-
         run: |
           isort --check-only .
 
       - name: Pytest
-
+        # Roda os testes do projeto usando o pytest e gera relatórios de cobertura
         run: |
-          pytest
+          mkdir -p reports
+          pytest --cov=src --cov-report=xml:coverage.xml --junitxml=reports/junit.xml
+
+      - name: Upload de artefatos de teste
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            coverage.xml
+            reports/junit.xml

@@ -23,9 +23,17 @@ from io import StringIO
 
 import pytest
 
-from src.logger import (StageTimer, _HumanFormatter, _JSONFormatter,
-                        get_correlation_id, get_logger, log_drift_alert,
-                        log_inference, pipeline_logger, set_correlation_id)
+from src.logger import (
+    StageTimer,
+    _HumanFormatter,
+    _JSONFormatter,
+    get_correlation_id,
+    get_logger,
+    log_drift_alert,
+    log_inference,
+    pipeline_logger,
+    set_correlation_id,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers

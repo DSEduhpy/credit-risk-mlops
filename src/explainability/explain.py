@@ -24,8 +24,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import shap
 
-from src.config import (FEATURES_PATH, MODEL_PATH, RANDOM_STATE, REPORTS_PATH,
-                        TARGET_COLUMN)
+from src.config import (
+    FEATURES_PATH,
+    MODEL_PATH,
+    RANDOM_STATE,
+    REPORTS_PATH,
+    TARGET_COLUMN,
+)
 from src.logger import get_logger
 
 logger = get_logger(__name__)
